@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApp", "TestApp\TestApp.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ItemClassLibrary", "ItemClassLibrary\ItemClassLibrary.csproj", "{F82A0C7B-81EE-40D9-B31B-02FE831AFE33}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AbilityPatternCreater", "AbilityPatternCreater\AbilityPatternCreater.csproj", "{2A9FA20A-0B28-4EFB-BB45-340690D53066}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{F82A0C7B-81EE-40D9-B31B-02FE831AFE33}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F82A0C7B-81EE-40D9-B31B-02FE831AFE33}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F82A0C7B-81EE-40D9-B31B-02FE831AFE33}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2A9FA20A-0B28-4EFB-BB45-340690D53066}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2A9FA20A-0B28-4EFB-BB45-340690D53066}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2A9FA20A-0B28-4EFB-BB45-340690D53066}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2A9FA20A-0B28-4EFB-BB45-340690D53066}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
