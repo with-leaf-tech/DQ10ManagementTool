@@ -80,6 +80,39 @@ namespace TestApp {
             */
 
             ItemManager manager = ItemManager.GetInstance();
+
+            string text = @"
+EE輝石のベルト+4
+腰アクセサリーレア度_A
+とりどりの宝石が
+さまざまな効果を
+生み出すベルト
+取り引き不可
+Lv 1以上装備可
+追加効果
+輝石効果:かいふく魔力 +1%
+輝石効果:エレ系に ダメージ+6.0%
+輝石効果:金
+秘石効果:烏系に ダメージ +6.0%
+>魅了 ガード+10.0%
+戦士 僧侶 魔使 武闘 盗賊 旅芸 バト パラ 魔戦 レン 賢者 スパ
+まも どう 踊り 占い 天地 遊び デス
+O装備できる仲間モンスターを見る
+";
+            Utility.AnalyzeItem(text, manager.GetItemData());
+
+
+
+
+
+
+
+
+
+
+
+
+
             manager.DownloadItemData();
         }
     }

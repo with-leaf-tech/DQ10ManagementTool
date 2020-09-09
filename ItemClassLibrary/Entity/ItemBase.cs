@@ -1,4 +1,5 @@
 ﻿using ItemClassLibrary.Util;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,12 +7,17 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace ItemClassLibrary.Entity {
-    abstract public class ItemBase {
+    public class ItemBase {
         public string[] allJobs = Utility.allJobs;
         public string Name { get; set; }
         public string Classification { get; set; }
         public string Description { get; set; }
-        abstract public void CreateItemData(Dictionary<string, string> itemData);
+        public virtual ItemBase Clone() {
+            return JsonConvert.DeserializeObject<ItemBase>(JsonConvert.SerializeObject(this));
+        }
+
+        public virtual void CreateItemData(Dictionary<string, string> itemData) {
+        }
 
         public Dictionary<string, float> AbilityCalc(List<string> setAbility) {
             Dictionary<string, float> setEquip = new Dictionary<string, float>();

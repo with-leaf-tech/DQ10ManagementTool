@@ -22,6 +22,9 @@ namespace ItemClassLibrary.Manage {
 
         string saveDirectory = @"C:\Text\";
         string saveItemFile = @"itemData.json";
+        string saveAbilityFile = @"ability.json";
+
+        List<AbilityPattern> abilityList = new List<AbilityPattern>();
 
         string[] setEquipUrls = new string[] {
                 "http://bazaar.d-quest-10.com/list/sp_set/lv_1.html"
@@ -98,9 +101,19 @@ namespace ItemClassLibrary.Manage {
 
         List<ItemBase> m_itemList = new List<ItemBase>();
 
+
+        public List<ItemBase> GetItemData() {
+            return m_itemList;
+        }
+
         private ItemManager() {
             // ローカル(ネットワーク)から定義ファイルを読み込む
             // 定義ファイルを解析しアイテムリストを保持する
+
+            if (File.Exists(saveDirectory + saveAbilityFile)) {
+                abilityList = Utility.ReadAbilityPattern(saveDirectory + saveAbilityFile);
+            }
+
             if (File.Exists(saveDirectory + saveItemFile)) {
                 string jsonString = File.ReadAllText(saveDirectory + saveItemFile);
 
@@ -113,22 +126,50 @@ namespace ItemClassLibrary.Manage {
                     }
                     else if (classification == Utility.PARTS_HEAD) {
                         Head data = JsonConvert.DeserializeObject<Head>(obj[i].ToString());
+                        if(abilityList.Where(x => x.Classification == classification).Count() > 0) {
+                            AbilityPattern ability = abilityList.Where(x => x.Classification == classification).First();
+                            data.AbilityPattern = ability.PatternList;
+                        }
                         m_itemList.Add(data);
                     }
                     else if (classification == Utility.PARTS_UPPERBODY) {
                         UpperBody data = JsonConvert.DeserializeObject<UpperBody>(obj[i].ToString());
+                        if (abilityList.Where(x => x.Classification == classification).Count() > 0) {
+                            AbilityPattern ability = abilityList.Where(x => x.Classification == classification).First();
+                            data.AbilityPattern = ability.PatternList;
+                        }
                         m_itemList.Add(data);
                     }
                     else if (classification == Utility.PARTS_LOWERBODY) {
                         LowerBody data = JsonConvert.DeserializeObject<LowerBody>(obj[i].ToString());
+                        if (abilityList.Where(x => x.Classification == classification).Count() > 0) {
+                            AbilityPattern ability = abilityList.Where(x => x.Classification == classification).First();
+                            data.AbilityPattern = ability.PatternList;
+                        }
                         m_itemList.Add(data);
                     }
                     else if (classification == Utility.PARTS_ARM) {
                         Arm data = JsonConvert.DeserializeObject<Arm>(obj[i].ToString());
+                        if (abilityList.Where(x => x.Classification == classification).Count() > 0) {
+                            AbilityPattern ability = abilityList.Where(x => x.Classification == classification).First();
+                            data.AbilityPattern = ability.PatternList;
+                        }
                         m_itemList.Add(data);
                     }
                     else if (classification == Utility.PARTS_LEG) {
                         Leg data = JsonConvert.DeserializeObject<Leg>(obj[i].ToString());
+                        if (abilityList.Where(x => x.Classification == classification).Count() > 0) {
+                            AbilityPattern ability = abilityList.Where(x => x.Classification == classification).First();
+                            data.AbilityPattern = ability.PatternList;
+                        }
+                        m_itemList.Add(data);
+                    }
+                    else if (classification == Utility.PARTS_SHIELD) {
+                        Shield data = JsonConvert.DeserializeObject<Shield>(obj[i].ToString());
+                        if (abilityList.Where(x => x.Classification == classification).Count() > 0) {
+                            AbilityPattern ability = abilityList.Where(x => x.Classification == classification).First();
+                            data.AbilityPattern = ability.PatternList;
+                        }
                         m_itemList.Add(data);
                     }
                     else if (
@@ -143,6 +184,10 @@ namespace ItemClassLibrary.Manage {
                         classification == Utility.PARTS_ACCESSORY_CREST
                         ) {
                         Accessory data = JsonConvert.DeserializeObject<Accessory>(obj[i].ToString());
+                        if (abilityList.Where(x => x.Classification == classification && data.Name == x.Name).Count() > 0) {
+                            AbilityPattern ability = abilityList.Where(x => x.Classification == classification && data.Name == x.Name).First();
+                            data.AbilityPattern = ability.PatternList;
+                        }
                         m_itemList.Add(data);
                     }
                     else if (
@@ -184,9 +229,32 @@ namespace ItemClassLibrary.Manage {
                         Item data = JsonConvert.DeserializeObject<Item>(obj[i].ToString());
                         m_itemList.Add(data);
                     }
-                    else {
+                    else if (
+                        classification == Utility.PARTS_WEAPON_ONEHANDSWORD ||
+                        classification == Utility.PARTS_WEAPON_TWOHANDSWORD ||
+                        classification == Utility.PARTS_WEAPON_KNIFE ||
+                        classification == Utility.PARTS_WEAPON_SPEAR ||
+                        classification == Utility.PARTS_WEAPON_AXE ||
+                        classification == Utility.PARTS_WEAPON_NAIL ||
+                        classification == Utility.PARTS_WEAPON_WHIP ||
+                        classification == Utility.PARTS_WEAPON_STICK ||
+                        classification == Utility.PARTS_WEAPON_WAND ||
+                        classification == Utility.PARTS_WEAPON_CLUB ||
+                        classification == Utility.PARTS_WEAPON_FAN ||
+                        classification == Utility.PARTS_WEAPON_HAMMER ||
+                        classification == Utility.PARTS_WEAPON_BOW ||
+                        classification == Utility.PARTS_WEAPON_BOOMERANG ||
+                        classification == Utility.PARTS_WEAPON_SICKLE
+                        ) {
                         Weapon data = JsonConvert.DeserializeObject<Weapon>(obj[i].ToString());
+                        if (abilityList.Where(x => x.Classification == Utility.PARTS_WEAPON).Count() > 0) {
+                            AbilityPattern ability = abilityList.Where(x => x.Classification == Utility.PARTS_WEAPON).First();
+                            data.AbilityPattern = ability.PatternList;
+                        }
                         m_itemList.Add(data);
+                    }
+                    else {
+                        int a = 0;
                     }
                 }
             }
@@ -323,6 +391,9 @@ namespace ItemClassLibrary.Manage {
             }
             else if (itemData[Utility.HEADER_DEFINE_CLASSIFICATION] == Utility.PARTS_LEG) {
                 returnData = new Leg(itemData);
+            }
+            else if (itemData[Utility.HEADER_DEFINE_CLASSIFICATION] == Utility.PARTS_SHIELD) {
+                returnData = new Shield(itemData);
             }
             else if (
                 itemData[Utility.HEADER_DEFINE_CLASSIFICATION] == Utility.PARTS_ACCESSORY_FACE ||

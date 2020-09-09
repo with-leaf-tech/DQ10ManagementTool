@@ -64,6 +64,7 @@
     <Compile Include="Entity\Equipment\Head.cs" />
     <Compile Include="Entity\Equipment\Leg.cs" />
     <Compile Include="Entity\Equipment\LowerBody.cs" />
+    <Compile Include="Entity\Equipment\Shield.cs" />
     <Compile Include="Entity\Equipment\UpperBody.cs" />
     <Compile Include="Entity\Item.cs" />
     <Compile Include="Entity\ItemBase.cs" />
