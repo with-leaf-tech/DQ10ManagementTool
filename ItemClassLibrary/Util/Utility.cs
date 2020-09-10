@@ -354,8 +354,15 @@ namespace ItemClassLibrary.Util {
                 for (int i = 0; i < detailList.Count; i++) {
                     detailList[i] = detailList[i].Replace(" ", "").Replace("_", "");
                 }
+                int refine = 0;
                 string itemName = GetNearlyString(name, defineList.Select(x => x.Name).ToList()).FirstOrDefault();
+                string refineString = name.Replace(itemName, "");
+                if(refineString.Length > 0) {
+                    refine = int.Parse(refineString);
+                }
+
                 EquipmentBase item = ((EquipmentBase)(defineList.Where(x => x.Name == itemName).FirstOrDefault())).Clone();
+                item.Refine = refine;
                 for (int i = 0; i < detailList.Count; i++) {
                     string[] ability = detailList[i].Split(new char[] { ':' });
                     if(ability.Length > 1) {

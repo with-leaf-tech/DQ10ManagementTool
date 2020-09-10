@@ -50,7 +50,7 @@
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.autoCaptureTextStopButton = new System.Windows.Forms.Button();
             this.autoCaptureTextStartButton = new System.Windows.Forms.Button();
-            this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
+            this.autoCaptureInterval = new System.Windows.Forms.NumericUpDown();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
             this.dataDownloadButton = new System.Windows.Forms.Button();
             this.captureTextBox = new System.Windows.Forms.TextBox();
@@ -92,6 +92,12 @@
             this.includeOtherCheckBox = new System.Windows.Forms.CheckBox();
             this.button1 = new System.Windows.Forms.Button();
             this.groupBox6 = new System.Windows.Forms.GroupBox();
+            this.settingRadio4 = new System.Windows.Forms.RadioButton();
+            this.settingRadio5 = new System.Windows.Forms.RadioButton();
+            this.settingRadio6 = new System.Windows.Forms.RadioButton();
+            this.noCaptureCheckBox = new System.Windows.Forms.CheckBox();
+            this.entryButton = new System.Windows.Forms.Button();
+            this.debug_button = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownTop)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownLeft)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -101,7 +107,7 @@
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupBox4.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.autoCaptureInterval)).BeginInit();
             this.groupBox5.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.registOrbNum01)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.registOrbNum02)).BeginInit();
@@ -121,38 +127,82 @@
             // numericUpDownTop
             // 
             this.numericUpDownTop.Location = new System.Drawing.Point(88, 12);
+            this.numericUpDownTop.Maximum = new decimal(new int[] {
+            10000,
+            0,
+            0,
+            0});
             this.numericUpDownTop.Name = "numericUpDownTop";
             this.numericUpDownTop.Size = new System.Drawing.Size(62, 19);
             this.numericUpDownTop.TabIndex = 0;
+            this.numericUpDownTop.ValueChanged += new System.EventHandler(this.numericUpDown_ValueChanged);
             // 
             // numericUpDownLeft
             // 
             this.numericUpDownLeft.Location = new System.Drawing.Point(20, 37);
+            this.numericUpDownLeft.Maximum = new decimal(new int[] {
+            10000,
+            0,
+            0,
+            0});
             this.numericUpDownLeft.Name = "numericUpDownLeft";
             this.numericUpDownLeft.Size = new System.Drawing.Size(62, 19);
             this.numericUpDownLeft.TabIndex = 1;
+            this.numericUpDownLeft.ValueChanged += new System.EventHandler(this.numericUpDown_ValueChanged);
             // 
             // pictureBox1
             // 
             this.pictureBox1.Location = new System.Drawing.Point(88, 37);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(320, 180);
+            this.pictureBox1.Size = new System.Drawing.Size(280, 180);
             this.pictureBox1.TabIndex = 2;
             this.pictureBox1.TabStop = false;
             // 
             // numericUpDownRight
             // 
-            this.numericUpDownRight.Location = new System.Drawing.Point(414, 198);
+            this.numericUpDownRight.Location = new System.Drawing.Point(374, 198);
+            this.numericUpDownRight.Maximum = new decimal(new int[] {
+            10000,
+            0,
+            0,
+            0});
+            this.numericUpDownRight.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
             this.numericUpDownRight.Name = "numericUpDownRight";
             this.numericUpDownRight.Size = new System.Drawing.Size(62, 19);
             this.numericUpDownRight.TabIndex = 3;
+            this.numericUpDownRight.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.numericUpDownRight.ValueChanged += new System.EventHandler(this.numericUpDown_ValueChanged);
             // 
             // numericUpDownBottom
             // 
-            this.numericUpDownBottom.Location = new System.Drawing.Point(346, 223);
+            this.numericUpDownBottom.Location = new System.Drawing.Point(306, 223);
+            this.numericUpDownBottom.Maximum = new decimal(new int[] {
+            10000,
+            0,
+            0,
+            0});
+            this.numericUpDownBottom.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
             this.numericUpDownBottom.Name = "numericUpDownBottom";
             this.numericUpDownBottom.Size = new System.Drawing.Size(62, 19);
             this.numericUpDownBottom.TabIndex = 4;
+            this.numericUpDownBottom.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.numericUpDownBottom.ValueChanged += new System.EventHandler(this.numericUpDown_ValueChanged);
             // 
             // groupBox1
             // 
@@ -160,7 +210,7 @@
             this.groupBox1.Controls.Add(this.ocrRadioAzure);
             this.groupBox1.Controls.Add(this.ocrRadioTesseract);
             this.groupBox1.Controls.Add(this.ocrRadioWindows);
-            this.groupBox1.Location = new System.Drawing.Point(3, 103);
+            this.groupBox1.Location = new System.Drawing.Point(3, 62);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(79, 108);
             this.groupBox1.TabIndex = 5;
@@ -226,7 +276,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(412, 225);
+            this.label2.Location = new System.Drawing.Point(374, 225);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(34, 12);
             this.label2.TabIndex = 7;
@@ -237,9 +287,9 @@
             this.groupBox2.Controls.Add(this.comboBoxDevice);
             this.groupBox2.Controls.Add(this.captureRadioCamera);
             this.groupBox2.Controls.Add(this.captureRadioDisplay);
-            this.groupBox2.Location = new System.Drawing.Point(414, 12);
+            this.groupBox2.Location = new System.Drawing.Point(376, 12);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(119, 92);
+            this.groupBox2.Size = new System.Drawing.Size(157, 92);
             this.groupBox2.TabIndex = 8;
             this.groupBox2.TabStop = false;
             // 
@@ -248,7 +298,7 @@
             this.comboBoxDevice.FormattingEnabled = true;
             this.comboBoxDevice.Location = new System.Drawing.Point(6, 62);
             this.comboBoxDevice.Name = "comboBoxDevice";
-            this.comboBoxDevice.Size = new System.Drawing.Size(106, 20);
+            this.comboBoxDevice.Size = new System.Drawing.Size(145, 20);
             this.comboBoxDevice.TabIndex = 2;
             // 
             // captureRadioCamera
@@ -261,6 +311,7 @@
             this.captureRadioCamera.TabStop = true;
             this.captureRadioCamera.Text = "カメラ";
             this.captureRadioCamera.UseVisualStyleBackColor = true;
+            this.captureRadioCamera.CheckedChanged += new System.EventHandler(this.captureRadio_CheckedChanged);
             // 
             // captureRadioDisplay
             // 
@@ -272,39 +323,45 @@
             this.captureRadioDisplay.TabStop = true;
             this.captureRadioDisplay.Text = "画面";
             this.captureRadioDisplay.UseVisualStyleBackColor = true;
+            this.captureRadioDisplay.CheckedChanged += new System.EventHandler(this.captureRadio_CheckedChanged);
             // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.settingRadio6);
+            this.groupBox3.Controls.Add(this.settingRadio5);
+            this.groupBox3.Controls.Add(this.settingRadio4);
             this.groupBox3.Controls.Add(this.settingRadio3);
             this.groupBox3.Controls.Add(this.settingRadio2);
             this.groupBox3.Controls.Add(this.settingRadio1);
-            this.groupBox3.Location = new System.Drawing.Point(414, 110);
+            this.groupBox3.Location = new System.Drawing.Point(376, 110);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(119, 82);
+            this.groupBox3.Size = new System.Drawing.Size(157, 82);
             this.groupBox3.TabIndex = 9;
             this.groupBox3.TabStop = false;
             // 
             // settingRadio3
             // 
             this.settingRadio3.AutoSize = true;
-            this.settingRadio3.Location = new System.Drawing.Point(6, 62);
+            this.settingRadio3.Location = new System.Drawing.Point(6, 39);
             this.settingRadio3.Name = "settingRadio3";
             this.settingRadio3.Size = new System.Drawing.Size(65, 16);
             this.settingRadio3.TabIndex = 2;
             this.settingRadio3.TabStop = true;
             this.settingRadio3.Text = "設定値3";
             this.settingRadio3.UseVisualStyleBackColor = true;
+            this.settingRadio3.CheckedChanged += new System.EventHandler(this.settingRadio_CheckedChanged);
             // 
             // settingRadio2
             // 
             this.settingRadio2.AutoSize = true;
-            this.settingRadio2.Location = new System.Drawing.Point(6, 40);
+            this.settingRadio2.Location = new System.Drawing.Point(86, 17);
             this.settingRadio2.Name = "settingRadio2";
             this.settingRadio2.Size = new System.Drawing.Size(65, 16);
             this.settingRadio2.TabIndex = 1;
             this.settingRadio2.TabStop = true;
             this.settingRadio2.Text = "設定値2";
             this.settingRadio2.UseVisualStyleBackColor = true;
+            this.settingRadio2.CheckedChanged += new System.EventHandler(this.settingRadio_CheckedChanged);
             // 
             // settingRadio1
             // 
@@ -316,6 +373,7 @@
             this.settingRadio1.TabStop = true;
             this.settingRadio1.Text = "設定値1";
             this.settingRadio1.UseVisualStyleBackColor = true;
+            this.settingRadio1.CheckedChanged += new System.EventHandler(this.settingRadio_CheckedChanged);
             // 
             // userListBox
             // 
@@ -325,6 +383,7 @@
             this.userListBox.Name = "userListBox";
             this.userListBox.Size = new System.Drawing.Size(95, 172);
             this.userListBox.TabIndex = 10;
+            this.userListBox.SelectedIndexChanged += new System.EventHandler(this.userListBox_SelectedIndexChanged);
             // 
             // userAddButton
             // 
@@ -334,6 +393,7 @@
             this.userAddButton.TabIndex = 11;
             this.userAddButton.Text = "追加";
             this.userAddButton.UseVisualStyleBackColor = true;
+            this.userAddButton.Click += new System.EventHandler(this.userAddButton_Click);
             // 
             // userDeleteButton
             // 
@@ -343,22 +403,24 @@
             this.userDeleteButton.TabIndex = 12;
             this.userDeleteButton.Text = "削除";
             this.userDeleteButton.UseVisualStyleBackColor = true;
+            this.userDeleteButton.Click += new System.EventHandler(this.userDeleteButton_Click);
             // 
             // captureTextButton
             // 
-            this.captureTextButton.Location = new System.Drawing.Point(3, 217);
+            this.captureTextButton.Location = new System.Drawing.Point(3, 172);
             this.captureTextButton.Name = "captureTextButton";
             this.captureTextButton.Size = new System.Drawing.Size(79, 45);
             this.captureTextButton.TabIndex = 13;
             this.captureTextButton.Text = "取り込み";
             this.captureTextButton.UseVisualStyleBackColor = true;
+            this.captureTextButton.Click += new System.EventHandler(this.captureTextButton_Click);
             // 
             // groupBox4
             // 
             this.groupBox4.Controls.Add(this.autoCaptureTextStopButton);
             this.groupBox4.Controls.Add(this.autoCaptureTextStartButton);
-            this.groupBox4.Controls.Add(this.numericUpDown1);
-            this.groupBox4.Location = new System.Drawing.Point(88, 218);
+            this.groupBox4.Controls.Add(this.autoCaptureInterval);
+            this.groupBox4.Location = new System.Drawing.Point(3, 218);
             this.groupBox4.Name = "groupBox4";
             this.groupBox4.Size = new System.Drawing.Size(253, 44);
             this.groupBox4.TabIndex = 14;
@@ -382,15 +444,21 @@
             this.autoCaptureTextStartButton.Text = "連続取り込み";
             this.autoCaptureTextStartButton.UseVisualStyleBackColor = true;
             // 
-            // numericUpDown1
+            // autoCaptureInterval
             // 
-            this.numericUpDown1.Location = new System.Drawing.Point(6, 15);
-            this.numericUpDown1.Name = "numericUpDown1";
-            this.numericUpDown1.Size = new System.Drawing.Size(62, 19);
-            this.numericUpDown1.TabIndex = 0;
+            this.autoCaptureInterval.Location = new System.Drawing.Point(6, 15);
+            this.autoCaptureInterval.Name = "autoCaptureInterval";
+            this.autoCaptureInterval.Size = new System.Drawing.Size(62, 19);
+            this.autoCaptureInterval.TabIndex = 0;
+            this.autoCaptureInterval.Value = new decimal(new int[] {
+            3,
+            0,
+            0,
+            0});
             // 
             // groupBox5
             // 
+            this.groupBox5.Controls.Add(this.debug_button);
             this.groupBox5.Controls.Add(this.dataDownloadButton);
             this.groupBox5.Location = new System.Drawing.Point(640, 12);
             this.groupBox5.Name = "groupBox5";
@@ -406,6 +474,7 @@
             this.dataDownloadButton.TabIndex = 0;
             this.dataDownloadButton.Text = "データダウンロード";
             this.dataDownloadButton.UseVisualStyleBackColor = true;
+            this.dataDownloadButton.Click += new System.EventHandler(this.dataDownloadButton_Click);
             // 
             // captureTextBox
             // 
@@ -759,11 +828,78 @@
             this.groupBox6.TabIndex = 53;
             this.groupBox6.TabStop = false;
             // 
+            // settingRadio4
+            // 
+            this.settingRadio4.AutoSize = true;
+            this.settingRadio4.Location = new System.Drawing.Point(86, 39);
+            this.settingRadio4.Name = "settingRadio4";
+            this.settingRadio4.Size = new System.Drawing.Size(65, 16);
+            this.settingRadio4.TabIndex = 3;
+            this.settingRadio4.TabStop = true;
+            this.settingRadio4.Text = "設定値4";
+            this.settingRadio4.UseVisualStyleBackColor = true;
+            this.settingRadio4.CheckedChanged += new System.EventHandler(this.settingRadio_CheckedChanged);
+            // 
+            // settingRadio5
+            // 
+            this.settingRadio5.AutoSize = true;
+            this.settingRadio5.Location = new System.Drawing.Point(6, 60);
+            this.settingRadio5.Name = "settingRadio5";
+            this.settingRadio5.Size = new System.Drawing.Size(65, 16);
+            this.settingRadio5.TabIndex = 4;
+            this.settingRadio5.TabStop = true;
+            this.settingRadio5.Text = "設定値5";
+            this.settingRadio5.UseVisualStyleBackColor = true;
+            this.settingRadio5.CheckedChanged += new System.EventHandler(this.settingRadio_CheckedChanged);
+            // 
+            // settingRadio6
+            // 
+            this.settingRadio6.AutoSize = true;
+            this.settingRadio6.Location = new System.Drawing.Point(86, 60);
+            this.settingRadio6.Name = "settingRadio6";
+            this.settingRadio6.Size = new System.Drawing.Size(65, 16);
+            this.settingRadio6.TabIndex = 5;
+            this.settingRadio6.TabStop = true;
+            this.settingRadio6.Text = "設定値6";
+            this.settingRadio6.UseVisualStyleBackColor = true;
+            this.settingRadio6.CheckedChanged += new System.EventHandler(this.settingRadio_CheckedChanged);
+            // 
+            // noCaptureCheckBox
+            // 
+            this.noCaptureCheckBox.AutoSize = true;
+            this.noCaptureCheckBox.Location = new System.Drawing.Point(196, 13);
+            this.noCaptureCheckBox.Name = "noCaptureCheckBox";
+            this.noCaptureCheckBox.Size = new System.Drawing.Size(172, 16);
+            this.noCaptureCheckBox.TabIndex = 54;
+            this.noCaptureCheckBox.Text = "サイズ調整中はキャプチャしない";
+            this.noCaptureCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // entryButton
+            // 
+            this.entryButton.Location = new System.Drawing.Point(559, 239);
+            this.entryButton.Name = "entryButton";
+            this.entryButton.Size = new System.Drawing.Size(75, 23);
+            this.entryButton.TabIndex = 55;
+            this.entryButton.Text = "登録";
+            this.entryButton.UseVisualStyleBackColor = true;
+            // 
+            // debug_button
+            // 
+            this.debug_button.Location = new System.Drawing.Point(213, 11);
+            this.debug_button.Name = "debug_button";
+            this.debug_button.Size = new System.Drawing.Size(75, 23);
+            this.debug_button.TabIndex = 1;
+            this.debug_button.Text = "デバッグ用";
+            this.debug_button.UseVisualStyleBackColor = true;
+            this.debug_button.Click += new System.EventHandler(this.debug_button_Click);
+            // 
             // DQ10ManagementForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(945, 757);
+            this.Controls.Add(this.entryButton);
+            this.Controls.Add(this.noCaptureCheckBox);
             this.Controls.Add(this.groupBox6);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.searchResultListBox);
@@ -801,7 +937,7 @@
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
             this.groupBox4.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.autoCaptureInterval)).EndInit();
             this.groupBox5.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.registOrbNum01)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.registOrbNum02)).EndInit();
@@ -851,7 +987,7 @@
         private System.Windows.Forms.GroupBox groupBox4;
         private System.Windows.Forms.Button autoCaptureTextStopButton;
         private System.Windows.Forms.Button autoCaptureTextStartButton;
-        private System.Windows.Forms.NumericUpDown numericUpDown1;
+        private System.Windows.Forms.NumericUpDown autoCaptureInterval;
         private System.Windows.Forms.GroupBox groupBox5;
         private System.Windows.Forms.Button dataDownloadButton;
         private System.Windows.Forms.TextBox captureTextBox;
@@ -893,6 +1029,12 @@
         private System.Windows.Forms.CheckBox includeOtherCheckBox;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.GroupBox groupBox6;
+        private System.Windows.Forms.RadioButton settingRadio6;
+        private System.Windows.Forms.RadioButton settingRadio5;
+        private System.Windows.Forms.RadioButton settingRadio4;
+        private System.Windows.Forms.CheckBox noCaptureCheckBox;
+        private System.Windows.Forms.Button entryButton;
+        private System.Windows.Forms.Button debug_button;
     }
 }
 
