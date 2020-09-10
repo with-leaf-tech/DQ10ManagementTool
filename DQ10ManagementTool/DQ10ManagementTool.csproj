@@ -55,6 +55,9 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="DQ10ManagementForm.resx">
+      <DependentUpon>DQ10ManagementForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -76,6 +79,16 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ItemClassLibrary\ItemClassLibrary.csproj">
+      <Project>{f82a0c7b-81ee-40d9-b31b-02fe831afe33}</Project>
+      <Name>ItemClassLibrary</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\OCRClassLibrary\OCRClassLibrary.csproj">
+      <Project>{8ffb4de2-d683-4d5b-a1f9-fd795432bdc3}</Project>
+      <Name>OCRClassLibrary</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
