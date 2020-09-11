@@ -112,6 +112,18 @@ namespace ItemClassLibrary.Util {
             PARTS_CRAFT_FISHING,
         };
 
+        public static string[] EQUIP_ACCESSORY_LIST = new string[] {
+            PARTS_ACCESSORY_FACE,
+            PARTS_ACCESSORY_NECK,
+            PARTS_ACCESSORY_FINGER,
+            PARTS_ACCESSORY_CHEST,
+            PARTS_ACCESSORY_WAIST,
+            PARTS_ACCESSORY_NOTE,
+            PARTS_ACCESSORY_OTHER,
+            PARTS_ACCESSORY_PROOF,
+            PARTS_ACCESSORY_CREST,
+        };
+
         public static string[] ITEM_CATEGORY_LIST = new string[] {
             ITEM_MATERIAL,
             ITEM_SUPPLY,
@@ -173,6 +185,31 @@ namespace ItemClassLibrary.Util {
             HEADER_DEFINE_BUY_PRICE, HEADER_DEFINE_SELL_PRICE, HEADER_DEFINE_OFFICIALPAGE, HEADER_DEFINE_ABILITY };
         public static string[] itemHeaderSimple = new string[] { HEADER_DEFINE_NAME };
 
+        public static string GetRefineAbility(string classification, string itemName) {
+            string refineName = "合成";
+            if (!Utility.EQUIP_ACCESSORY_LIST.Contains(classification)) {
+                refineName = "錬金";
+            }
+            if (itemName == "輝石のベルト") {
+                refineName = "輝石";
+            }
+            else if (itemName == "戦神のベルト") {
+                refineName = "戦神";
+            }
+            return refineName;
+        }
+
+        public static string GetSpecialAbility(string classification, string itemName) {
+            string refineName = "伝承";
+            if (itemName == "輝石のベルト") {
+                refineName = "秘石";
+            }
+            else if (itemName == "戦神のベルト") {
+                refineName = "鬼石";
+            }
+            return refineName;
+        }
+
         public static void WriteAbilityPattern(string path, List<AbilityPattern> abilityList) {
             string jsonString = JsonConvert.SerializeObject(abilityList);
             File.WriteAllText(path, jsonString);
@@ -197,12 +234,17 @@ namespace ItemClassLibrary.Util {
                 int[] tempHitList = candidacyData.Select(x => x.Contains(part) ? 1 : 0).ToArray();
                 hitList = hitList.Select((x, j) => x + tempHitList[j]).ToList();
             }
-            int topScore = hitList.Max();
-            var hitIndexList = hitList.Select((x, i) => new int[] { x, i }).OrderByDescending(y => y[0]).ToList();
+            if(hitList.Count > 0) {
+                int topScore = hitList.Max();
+                var hitIndexList = hitList.Select((x, i) => new int[] { x, i }).OrderByDescending(y => y[0]).ToList();
 
-            // 候補を5件まで取る
-            for(int i = 0; i < (hitIndexList.Count >= 5 ? 5 : hitIndexList.Count); i++) {
-                topList.Add(candidacyData[hitIndexList[i][1]]);
+                // 候補を5件まで取る
+                for (int i = 0; i < (hitIndexList.Count >= 5 ? 5 : hitIndexList.Count); i++) {
+                    topList.Add(candidacyData[hitIndexList[i][1]]);
+                }
+            }
+            else {
+                topList.Add(source);
             }
 
             //var topIndex = hitList.Select((x, i) => new int[] { x, i }).Where(x => x[0] == topScore).Select(x => x[1]).ToArray();
@@ -211,11 +253,11 @@ namespace ItemClassLibrary.Util {
             return topList;
         }
 
-        public static List<(ItemBase, int)> AnalyzeItem(string text, List<ItemBase> itemList) {
+        public static List<ItemBase> AnalyzeItem(int userId, string text, List<ItemBase> itemList) {
             string name = "";
             string equip = "";
             List<string> detailList = new List<string>();
-            List<(ItemBase, int)> returnList = new List<(ItemBase, int)>();
+            List<ItemBase> returnList = new List<ItemBase>();
             int remainBorder = 11;
             string tempName = "";
 
@@ -267,8 +309,10 @@ namespace ItemClassLibrary.Util {
                 }
                 for(int i = 0; i < detailList.Count; i++) {
                     string[] itemParts = detailList[i].Split(new char[] { ',' });
-                    Item item = (Item)(itemList.Where(x => x.Name == itemParts[0]).FirstOrDefault());
-                    returnList.Add((item, int.Parse(itemParts[1])));
+                    Item item = ((Item)(itemList.Where(x => x.Name == itemParts[0]).FirstOrDefault())).Clone();
+                    item.OwnerId = userId;
+                    item.count = int.Parse(itemParts[1]);
+                    returnList.Add(item);
                 }
             }
             else {
@@ -362,6 +406,7 @@ namespace ItemClassLibrary.Util {
                 }
 
                 EquipmentBase item = ((EquipmentBase)(defineList.Where(x => x.Name == itemName).FirstOrDefault())).Clone();
+                item.OwnerId = userId;
                 item.Refine = refine;
                 for (int i = 0; i < detailList.Count; i++) {
                     string[] ability = detailList[i].Split(new char[] { ':' });
@@ -377,7 +422,7 @@ namespace ItemClassLibrary.Util {
                         }
                     }
                 }
-                returnList.Add((item, 1));
+                returnList.Add(item);
             }
             return returnList;
         }

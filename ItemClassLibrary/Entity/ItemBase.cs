@@ -9,9 +9,12 @@ using System.Threading.Tasks;
 namespace ItemClassLibrary.Entity {
     public class ItemBase {
         public string[] allJobs = Utility.allJobs;
+        public int OwnerId { get; set; }
         public string Name { get; set; }
         public string Classification { get; set; }
         public string Description { get; set; }
+        public int count { get; set; }
+
         public virtual ItemBase Clone() {
             return JsonConvert.DeserializeObject<ItemBase>(JsonConvert.SerializeObject(this));
         }

@@ -32,13 +32,22 @@ namespace DQ10ManagementTool {
         int settingCount = 6;
         bool noChange = false;
 
+        private string saveItemFile = @"ItemData.json";
+        private string saveEquipFile = @"EquipData.json";
+
         List<(int top, int left, int right, int bottom, bool check)> settingList = new List<(int top, int left, int right, int bottom, bool check)>();
         List<(int id, string name, bool check)> userList = new List<(int id, string name, bool check)>();
 
         ItemManager itemManager = ItemManager.GetInstance();
         List<ItemBase> defineItemData = new List<ItemBase>();
 
+        List<ItemBase> entryItems = new List<ItemBase>();
+
         CameraManager camera = new CameraManager();
+
+        //EntryEquipForm entryEquipWindow = new EntryEquipForm();
+        //ItemEntryForm entryItemWindow = new ItemEntryForm();
+        EntryForm entryWindow = new EntryForm();
 
         public DQ10ManagementForm() {
             InitializeComponent();
@@ -77,6 +86,10 @@ namespace DQ10ManagementTool {
 
             loadSetting();
             loadUserData();
+
+            searchEquipRadioButton.Checked = true;
+            selectUserRadioButton.Checked = true;
+
         }
 
         private void loadUserData() {
@@ -283,14 +296,16 @@ namespace DQ10ManagementTool {
             string text = ocr.GetTextFromImage(img).Replace("\n", "\r\n");
             img.Dispose();
 
-            List<(ItemBase, int)> analyzeData = Utility.AnalyzeItem(text, itemManager.GetItemData());
+            int userId = userList.Where(x => x.name == userListBox.SelectedItem.ToString()).First().id;
+            List<ItemBase> analyzeData = Utility.AnalyzeItem(userId, text, itemManager.GetItemData());
             string analyzeText = "";
-            if (Utility.EQUIP_CATEGORY_LIST.Contains(analyzeData[0].Item1.Classification)) {
-                analyzeText = DisplayEquip((EquipmentBase)analyzeData[0].Item1);
+            if (Utility.EQUIP_CATEGORY_LIST.Contains(analyzeData[0].Classification)) {
+                analyzeText = DisplayEquip((EquipmentBase)analyzeData[0]);
             }
             else {
                 analyzeText = DisplayItem(analyzeData);
             }
+            entryItems = analyzeData;
 
             if (InvokeRequired) {
                 Invoke((MethodInvoker)delegate {
@@ -323,13 +338,13 @@ namespace DQ10ManagementTool {
             return sb.ToString();
         }
 
-        private string DisplayItem(List<(ItemBase, int)> items) {
+        private string DisplayItem(List<ItemBase> items) {
             StringBuilder sb = new StringBuilder();
             for(int i = 0; i < items.Count; i++) {
-                sb.Append("名前:" + items[i].Item1.Name + Environment.NewLine);
-                sb.Append("分類:" + items[i].Item1.Classification + Environment.NewLine);
-                sb.Append("説明:" + items[i].Item1.Description + Environment.NewLine);
-                sb.Append("個数:" + items[i].Item2 + Environment.NewLine + Environment.NewLine);
+                sb.Append("名前:" + items[i].Name + Environment.NewLine);
+                sb.Append("分類:" + items[i].Classification + Environment.NewLine);
+                sb.Append("説明:" + items[i].Description + Environment.NewLine);
+                sb.Append("個数:" + items[i].count + Environment.NewLine + Environment.NewLine);
             }
             return sb.ToString();
         }
@@ -341,36 +356,34 @@ namespace DQ10ManagementTool {
 
         private void debug_button_Click(object sender, EventArgs e) {
             string text = @"
-せかいじゅの葉
-せかいじゅの葉
-せかいじゅのしずく
-まほうのせいすい
-まほうのせいすい
-まほうのせいすい
-まほうのせいすい
-まほうのせいすい
-まほうのせいすい
-まほうのせいすい
-99こ
-33こ
-4こ
-99こ
-99こ
-99こ
-99こ
-99こ
-99こ
-75こ
+の鉄壁のすねあて+3
+足レア度 B
+使い込み。店売り不可
+敵の猛攻撃にも
+びくともしない
+堅牢なすねあて
+Lv 96以上装備可
+錬金石D青の練金石
+追加効果
+錬金効果:おもさ+15(-10)
+錬金効果:おもさ+15(+2)
+錬金効果:転びガード+90(-81)%
+できのよさ:すばやさ +3
+戦士 僧侶 魔使 武闘 盗賊 旅芸 バト パラ 魔戦 レン 賢者 スパ
+まも どう 踊り 占い 天地 遊び デス
+0錬金強化を見る
+O装備できる仲間モンスターを見る
 ";
-
-            List<(ItemBase, int)> analyzeData = Utility.AnalyzeItem(text, itemManager.GetItemData());
+            int userId = userList.Where(x => x.name == userListBox.SelectedItem.ToString()).First().id;
+            List<ItemBase> analyzeData = Utility.AnalyzeItem(userId, text, itemManager.GetItemData());
             string analyzeText = "";
-            if (Utility.EQUIP_CATEGORY_LIST.Contains(analyzeData[0].Item1.Classification)) {
-                analyzeText = DisplayEquip((EquipmentBase)analyzeData[0].Item1);
+            if (Utility.EQUIP_CATEGORY_LIST.Contains(analyzeData[0].Classification)) {
+                analyzeText = DisplayEquip((EquipmentBase)analyzeData[0]);
             }
             else {
                 analyzeText = DisplayItem(analyzeData);
             }
+            entryItems = analyzeData;
 
             if (InvokeRequired) {
                 Invoke((MethodInvoker)delegate {
@@ -389,6 +402,117 @@ namespace DQ10ManagementTool {
 
 
 
+        }
+
+        private void entryButton_Click(object sender, EventArgs e) {
+            if(entryItems.Count == 0) {
+                return;
+            }
+            int userId = userList.Where(x => x.name == userListBox.SelectedItem.ToString()).First().id;
+            entryWindow.SetItems(userId, entryItems, defineItemData);
+            entryWindow.ShowDialog();
+        }
+
+        private void displaySearchCategory() {
+            searchPartsListBox.Items.Clear();
+            searchAbilityListBox.Items.Clear();
+            searchResultListBox.Items.Clear();
+            if (searchEquipRadioButton.Checked) {
+                searchPartsListBox.Items.AddRange(Utility.EQUIP_CATEGORY_LIST);
+            }
+            else {
+                searchPartsListBox.Items.AddRange(Utility.ITEM_CATEGORY_LIST);
+            }
+        }
+
+        private void displaySearchList() {
+            searchAbilityListBox.Items.Clear();
+            searchResultListBox.Items.Clear();
+            List<int> userIdList = new List<int>();
+            if (selectUserRadioButton.Checked) {
+                userIdList.Add(userList.Where(x => x.name == userListBox.SelectedItem.ToString()).First().id);
+            }
+            else {
+                userIdList.AddRange(userList.Select(x => x.id).ToArray());
+            }
+
+            if (searchPartsListBox.SelectedIndex >= 0) {
+                if (searchEquipRadioButton.Checked) {
+                    List<EquipmentBase> equipList = new List<EquipmentBase>();
+                    for (int i = 0; i < userIdList.Count; i++) {
+                        if (File.Exists(userIdList[i] + "_" + saveEquipFile)) {
+                            equipList.AddRange(JsonConvert.DeserializeObject<List<EquipmentBase>>(File.ReadAllText(userIdList[i] + "_" + saveEquipFile)));
+                        }
+                    }
+                    searchAbilityListBox.Items.AddRange(equipList.Where(x => x.Classification == searchPartsListBox.SelectedItem.ToString()).Select(x => x.Name).Distinct().ToArray());
+                }
+                else {
+                    List<Item> itemList = new List<Item>();
+                    for (int i = 0; i < userIdList.Count; i++) {
+                        if (File.Exists(userIdList[i] + "_" + saveItemFile)) {
+                            itemList.AddRange(JsonConvert.DeserializeObject<List<Item>>(File.ReadAllText(userIdList[i] + "_" + saveItemFile)));
+                        }
+                    }
+                    searchAbilityListBox.Items.AddRange(itemList.Where(x => x.Classification == searchPartsListBox.SelectedItem.ToString()).Select(x => x.Name).Distinct().ToArray());
+                }
+            }
+        }
+
+        private void DispaySearchResult() {
+            searchResultListBox.Items.Clear();
+            Dictionary<int, string> nameDic = new Dictionary<int, string>();
+            for(int i = 0; i < userList.Count; i++) {
+                nameDic[userList[i].id] = userList[i].name;
+            }
+            List<int> userIdList = new List<int>();
+            if (selectUserRadioButton.Checked) {
+                userIdList.Add(userList.Where(x => x.name == userListBox.SelectedItem.ToString()).First().id);
+            }
+            else {
+                userIdList.AddRange(userList.Select(x => x.id).ToArray());
+            }
+            if (searchPartsListBox.SelectedIndex >= 0 && searchAbilityListBox.SelectedIndex >= 0) {
+                if (searchEquipRadioButton.Checked) {
+                    List<EquipmentBase> equipList = new List<EquipmentBase>();
+                    for (int i = 0; i < userIdList.Count; i++) {
+                        if (File.Exists(userIdList[i] + "_" + saveEquipFile)) {
+                            equipList.AddRange(JsonConvert.DeserializeObject<List<EquipmentBase>>(File.ReadAllText(userIdList[i] + "_" + saveEquipFile)));
+                        }
+                    }
+                    searchResultListBox.Items.AddRange(equipList.Where(x => x.Classification == searchPartsListBox.SelectedItem.ToString() && x.Name == searchAbilityListBox.SelectedItem.ToString()).Select(x => nameDic[x.OwnerId] + "\t" + x.Name).ToArray());
+                }
+                else {
+                    List<Item> itemList = new List<Item>();
+                    for (int i = 0; i < userIdList.Count; i++) {
+                        if (File.Exists(userIdList[i] + "_" + saveItemFile)) {
+                            itemList.AddRange(JsonConvert.DeserializeObject<List<Item>>(File.ReadAllText(userIdList[i] + "_" + saveItemFile)));
+                        }
+                    }
+                    searchResultListBox.Items.AddRange(itemList.Where(x => x.Classification == searchPartsListBox.SelectedItem.ToString() && x.Name == searchAbilityListBox.SelectedItem.ToString()).Select(x => nameDic[x.OwnerId] + "\t" + x.Name).ToArray());
+                }
+            }
+
+        }
+
+
+
+
+
+
+        private void searchButton_CheckedChanged(object sender, EventArgs e) {
+            displaySearchCategory();
+        }
+
+        private void userRadioButton_CheckedChanged(object sender, EventArgs e) {
+            displaySearchList();
+        }
+
+        private void searchAbilityListBox_SelectedIndexChanged(object sender, EventArgs e) {
+            DispaySearchResult();
+        }
+
+        private void searchPartsListBox_SelectedIndexChanged(object sender, EventArgs e) {
+            displaySearchList();
         }
     }
 }

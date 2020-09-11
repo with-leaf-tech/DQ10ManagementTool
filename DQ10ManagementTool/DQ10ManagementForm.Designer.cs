@@ -40,6 +40,9 @@
             this.captureRadioCamera = new System.Windows.Forms.RadioButton();
             this.captureRadioDisplay = new System.Windows.Forms.RadioButton();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.settingRadio6 = new System.Windows.Forms.RadioButton();
+            this.settingRadio5 = new System.Windows.Forms.RadioButton();
+            this.settingRadio4 = new System.Windows.Forms.RadioButton();
             this.settingRadio3 = new System.Windows.Forms.RadioButton();
             this.settingRadio2 = new System.Windows.Forms.RadioButton();
             this.settingRadio1 = new System.Windows.Forms.RadioButton();
@@ -52,6 +55,7 @@
             this.autoCaptureTextStartButton = new System.Windows.Forms.Button();
             this.autoCaptureInterval = new System.Windows.Forms.NumericUpDown();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
+            this.debug_button = new System.Windows.Forms.Button();
             this.dataDownloadButton = new System.Windows.Forms.Button();
             this.captureTextBox = new System.Windows.Forms.TextBox();
             this.analyzeTextBox = new System.Windows.Forms.TextBox();
@@ -92,12 +96,14 @@
             this.includeOtherCheckBox = new System.Windows.Forms.CheckBox();
             this.button1 = new System.Windows.Forms.Button();
             this.groupBox6 = new System.Windows.Forms.GroupBox();
-            this.settingRadio4 = new System.Windows.Forms.RadioButton();
-            this.settingRadio5 = new System.Windows.Forms.RadioButton();
-            this.settingRadio6 = new System.Windows.Forms.RadioButton();
             this.noCaptureCheckBox = new System.Windows.Forms.CheckBox();
             this.entryButton = new System.Windows.Forms.Button();
-            this.debug_button = new System.Windows.Forms.Button();
+            this.groupBox7 = new System.Windows.Forms.GroupBox();
+            this.searchEquipRadioButton = new System.Windows.Forms.RadioButton();
+            this.searchItemRadioButton = new System.Windows.Forms.RadioButton();
+            this.groupBox8 = new System.Windows.Forms.GroupBox();
+            this.selectUserRadioButton = new System.Windows.Forms.RadioButton();
+            this.allUserRadioButton = new System.Windows.Forms.RadioButton();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownTop)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownLeft)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -122,6 +128,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.registOrbNum11)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.registOrbNum12)).BeginInit();
             this.groupBox6.SuspendLayout();
+            this.groupBox7.SuspendLayout();
+            this.groupBox8.SuspendLayout();
             this.SuspendLayout();
             // 
             // numericUpDownTop
@@ -339,6 +347,42 @@
             this.groupBox3.TabIndex = 9;
             this.groupBox3.TabStop = false;
             // 
+            // settingRadio6
+            // 
+            this.settingRadio6.AutoSize = true;
+            this.settingRadio6.Location = new System.Drawing.Point(86, 60);
+            this.settingRadio6.Name = "settingRadio6";
+            this.settingRadio6.Size = new System.Drawing.Size(65, 16);
+            this.settingRadio6.TabIndex = 5;
+            this.settingRadio6.TabStop = true;
+            this.settingRadio6.Text = "設定値6";
+            this.settingRadio6.UseVisualStyleBackColor = true;
+            this.settingRadio6.CheckedChanged += new System.EventHandler(this.settingRadio_CheckedChanged);
+            // 
+            // settingRadio5
+            // 
+            this.settingRadio5.AutoSize = true;
+            this.settingRadio5.Location = new System.Drawing.Point(6, 60);
+            this.settingRadio5.Name = "settingRadio5";
+            this.settingRadio5.Size = new System.Drawing.Size(65, 16);
+            this.settingRadio5.TabIndex = 4;
+            this.settingRadio5.TabStop = true;
+            this.settingRadio5.Text = "設定値5";
+            this.settingRadio5.UseVisualStyleBackColor = true;
+            this.settingRadio5.CheckedChanged += new System.EventHandler(this.settingRadio_CheckedChanged);
+            // 
+            // settingRadio4
+            // 
+            this.settingRadio4.AutoSize = true;
+            this.settingRadio4.Location = new System.Drawing.Point(86, 39);
+            this.settingRadio4.Name = "settingRadio4";
+            this.settingRadio4.Size = new System.Drawing.Size(65, 16);
+            this.settingRadio4.TabIndex = 3;
+            this.settingRadio4.TabStop = true;
+            this.settingRadio4.Text = "設定値4";
+            this.settingRadio4.UseVisualStyleBackColor = true;
+            this.settingRadio4.CheckedChanged += new System.EventHandler(this.settingRadio_CheckedChanged);
+            // 
             // settingRadio3
             // 
             this.settingRadio3.AutoSize = true;
@@ -466,6 +510,16 @@
             this.groupBox5.TabIndex = 15;
             this.groupBox5.TabStop = false;
             // 
+            // debug_button
+            // 
+            this.debug_button.Location = new System.Drawing.Point(213, 11);
+            this.debug_button.Name = "debug_button";
+            this.debug_button.Size = new System.Drawing.Size(75, 23);
+            this.debug_button.TabIndex = 1;
+            this.debug_button.Text = "デバッグ用";
+            this.debug_button.UseVisualStyleBackColor = true;
+            this.debug_button.Click += new System.EventHandler(this.debug_button_Click);
+            // 
             // dataDownloadButton
             // 
             this.dataDownloadButton.Location = new System.Drawing.Point(6, 11);
@@ -498,25 +552,27 @@
             // 
             this.searchPartsListBox.FormattingEnabled = true;
             this.searchPartsListBox.ItemHeight = 12;
-            this.searchPartsListBox.Location = new System.Drawing.Point(3, 488);
+            this.searchPartsListBox.Location = new System.Drawing.Point(3, 525);
             this.searchPartsListBox.Name = "searchPartsListBox";
             this.searchPartsListBox.Size = new System.Drawing.Size(69, 256);
             this.searchPartsListBox.TabIndex = 18;
+            this.searchPartsListBox.SelectedIndexChanged += new System.EventHandler(this.searchPartsListBox_SelectedIndexChanged);
             // 
             // searchAbilityListBox
             // 
             this.searchAbilityListBox.FormattingEnabled = true;
             this.searchAbilityListBox.ItemHeight = 12;
-            this.searchAbilityListBox.Location = new System.Drawing.Point(78, 488);
+            this.searchAbilityListBox.Location = new System.Drawing.Point(78, 525);
             this.searchAbilityListBox.Name = "searchAbilityListBox";
             this.searchAbilityListBox.Size = new System.Drawing.Size(115, 256);
             this.searchAbilityListBox.TabIndex = 19;
+            this.searchAbilityListBox.SelectedIndexChanged += new System.EventHandler(this.searchAbilityListBox_SelectedIndexChanged);
             // 
             // searchResultListBox
             // 
             this.searchResultListBox.FormattingEnabled = true;
             this.searchResultListBox.ItemHeight = 12;
-            this.searchResultListBox.Location = new System.Drawing.Point(199, 489);
+            this.searchResultListBox.Location = new System.Drawing.Point(199, 525);
             this.searchResultListBox.Name = "searchResultListBox";
             this.searchResultListBox.Size = new System.Drawing.Size(735, 256);
             this.searchResultListBox.TabIndex = 20;
@@ -828,42 +884,6 @@
             this.groupBox6.TabIndex = 53;
             this.groupBox6.TabStop = false;
             // 
-            // settingRadio4
-            // 
-            this.settingRadio4.AutoSize = true;
-            this.settingRadio4.Location = new System.Drawing.Point(86, 39);
-            this.settingRadio4.Name = "settingRadio4";
-            this.settingRadio4.Size = new System.Drawing.Size(65, 16);
-            this.settingRadio4.TabIndex = 3;
-            this.settingRadio4.TabStop = true;
-            this.settingRadio4.Text = "設定値4";
-            this.settingRadio4.UseVisualStyleBackColor = true;
-            this.settingRadio4.CheckedChanged += new System.EventHandler(this.settingRadio_CheckedChanged);
-            // 
-            // settingRadio5
-            // 
-            this.settingRadio5.AutoSize = true;
-            this.settingRadio5.Location = new System.Drawing.Point(6, 60);
-            this.settingRadio5.Name = "settingRadio5";
-            this.settingRadio5.Size = new System.Drawing.Size(65, 16);
-            this.settingRadio5.TabIndex = 4;
-            this.settingRadio5.TabStop = true;
-            this.settingRadio5.Text = "設定値5";
-            this.settingRadio5.UseVisualStyleBackColor = true;
-            this.settingRadio5.CheckedChanged += new System.EventHandler(this.settingRadio_CheckedChanged);
-            // 
-            // settingRadio6
-            // 
-            this.settingRadio6.AutoSize = true;
-            this.settingRadio6.Location = new System.Drawing.Point(86, 60);
-            this.settingRadio6.Name = "settingRadio6";
-            this.settingRadio6.Size = new System.Drawing.Size(65, 16);
-            this.settingRadio6.TabIndex = 5;
-            this.settingRadio6.TabStop = true;
-            this.settingRadio6.Text = "設定値6";
-            this.settingRadio6.UseVisualStyleBackColor = true;
-            this.settingRadio6.CheckedChanged += new System.EventHandler(this.settingRadio_CheckedChanged);
-            // 
             // noCaptureCheckBox
             // 
             this.noCaptureCheckBox.AutoSize = true;
@@ -882,22 +902,83 @@
             this.entryButton.TabIndex = 55;
             this.entryButton.Text = "登録";
             this.entryButton.UseVisualStyleBackColor = true;
+            this.entryButton.Click += new System.EventHandler(this.entryButton_Click);
             // 
-            // debug_button
+            // groupBox7
             // 
-            this.debug_button.Location = new System.Drawing.Point(213, 11);
-            this.debug_button.Name = "debug_button";
-            this.debug_button.Size = new System.Drawing.Size(75, 23);
-            this.debug_button.TabIndex = 1;
-            this.debug_button.Text = "デバッグ用";
-            this.debug_button.UseVisualStyleBackColor = true;
-            this.debug_button.Click += new System.EventHandler(this.debug_button_Click);
+            this.groupBox7.Controls.Add(this.searchItemRadioButton);
+            this.groupBox7.Controls.Add(this.searchEquipRadioButton);
+            this.groupBox7.Location = new System.Drawing.Point(3, 478);
+            this.groupBox7.Name = "groupBox7";
+            this.groupBox7.Size = new System.Drawing.Size(131, 41);
+            this.groupBox7.TabIndex = 56;
+            this.groupBox7.TabStop = false;
+            // 
+            // searchEquipRadioButton
+            // 
+            this.searchEquipRadioButton.AutoSize = true;
+            this.searchEquipRadioButton.Location = new System.Drawing.Point(6, 18);
+            this.searchEquipRadioButton.Name = "searchEquipRadioButton";
+            this.searchEquipRadioButton.Size = new System.Drawing.Size(47, 16);
+            this.searchEquipRadioButton.TabIndex = 0;
+            this.searchEquipRadioButton.TabStop = true;
+            this.searchEquipRadioButton.Text = "装備";
+            this.searchEquipRadioButton.UseVisualStyleBackColor = true;
+            this.searchEquipRadioButton.CheckedChanged += new System.EventHandler(this.searchButton_CheckedChanged);
+            // 
+            // searchItemRadioButton
+            // 
+            this.searchItemRadioButton.AutoSize = true;
+            this.searchItemRadioButton.Location = new System.Drawing.Point(59, 18);
+            this.searchItemRadioButton.Name = "searchItemRadioButton";
+            this.searchItemRadioButton.Size = new System.Drawing.Size(60, 16);
+            this.searchItemRadioButton.TabIndex = 1;
+            this.searchItemRadioButton.TabStop = true;
+            this.searchItemRadioButton.Text = "アイテム";
+            this.searchItemRadioButton.UseVisualStyleBackColor = true;
+            this.searchItemRadioButton.CheckedChanged += new System.EventHandler(this.searchButton_CheckedChanged);
+            // 
+            // groupBox8
+            // 
+            this.groupBox8.Controls.Add(this.allUserRadioButton);
+            this.groupBox8.Controls.Add(this.selectUserRadioButton);
+            this.groupBox8.Location = new System.Drawing.Point(141, 478);
+            this.groupBox8.Name = "groupBox8";
+            this.groupBox8.Size = new System.Drawing.Size(187, 41);
+            this.groupBox8.TabIndex = 57;
+            this.groupBox8.TabStop = false;
+            // 
+            // selectUserRadioButton
+            // 
+            this.selectUserRadioButton.AutoSize = true;
+            this.selectUserRadioButton.Location = new System.Drawing.Point(7, 17);
+            this.selectUserRadioButton.Name = "selectUserRadioButton";
+            this.selectUserRadioButton.Size = new System.Drawing.Size(87, 16);
+            this.selectUserRadioButton.TabIndex = 0;
+            this.selectUserRadioButton.TabStop = true;
+            this.selectUserRadioButton.Text = "選択ユーザー";
+            this.selectUserRadioButton.UseVisualStyleBackColor = true;
+            this.selectUserRadioButton.CheckedChanged += new System.EventHandler(this.userRadioButton_CheckedChanged);
+            // 
+            // allUserRadioButton
+            // 
+            this.allUserRadioButton.AutoSize = true;
+            this.allUserRadioButton.Location = new System.Drawing.Point(99, 17);
+            this.allUserRadioButton.Name = "allUserRadioButton";
+            this.allUserRadioButton.Size = new System.Drawing.Size(75, 16);
+            this.allUserRadioButton.TabIndex = 1;
+            this.allUserRadioButton.TabStop = true;
+            this.allUserRadioButton.Text = "全ユーザー";
+            this.allUserRadioButton.UseVisualStyleBackColor = true;
+            this.allUserRadioButton.CheckedChanged += new System.EventHandler(this.userRadioButton_CheckedChanged);
             // 
             // DQ10ManagementForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(945, 757);
+            this.ClientSize = new System.Drawing.Size(945, 788);
+            this.Controls.Add(this.groupBox8);
+            this.Controls.Add(this.groupBox7);
             this.Controls.Add(this.entryButton);
             this.Controls.Add(this.noCaptureCheckBox);
             this.Controls.Add(this.groupBox6);
@@ -953,6 +1034,10 @@
             ((System.ComponentModel.ISupportInitialize)(this.registOrbNum12)).EndInit();
             this.groupBox6.ResumeLayout(false);
             this.groupBox6.PerformLayout();
+            this.groupBox7.ResumeLayout(false);
+            this.groupBox7.PerformLayout();
+            this.groupBox8.ResumeLayout(false);
+            this.groupBox8.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1035,6 +1120,12 @@
         private System.Windows.Forms.CheckBox noCaptureCheckBox;
         private System.Windows.Forms.Button entryButton;
         private System.Windows.Forms.Button debug_button;
+        private System.Windows.Forms.GroupBox groupBox7;
+        private System.Windows.Forms.RadioButton searchItemRadioButton;
+        private System.Windows.Forms.RadioButton searchEquipRadioButton;
+        private System.Windows.Forms.GroupBox groupBox8;
+        private System.Windows.Forms.RadioButton allUserRadioButton;
+        private System.Windows.Forms.RadioButton selectUserRadioButton;
     }
 }
 

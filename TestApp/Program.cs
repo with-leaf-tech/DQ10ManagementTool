@@ -99,7 +99,7 @@ Lv 1以上装備可
 まも どう 踊り 占い 天地 遊び デス
 O装備できる仲間モンスターを見る
 ";
-            Utility.AnalyzeItem(text, manager.GetItemData());
+            Utility.AnalyzeItem(1, text, manager.GetItemData());
 
 
 

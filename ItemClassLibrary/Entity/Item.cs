@@ -1,4 +1,5 @@
 ﻿using ItemClassLibrary.Util;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,6 +8,11 @@ using System.Threading.Tasks;
 
 namespace ItemClassLibrary.Entity {
     public class Item : ItemBase {
+
+        public virtual Item Clone() {
+            return JsonConvert.DeserializeObject<Item>(JsonConvert.SerializeObject(this));
+        }
+
         public Item(Dictionary<string, string> itemData) {
             CreateItemData(itemData);
         }
