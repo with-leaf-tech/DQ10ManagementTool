@@ -33,7 +33,7 @@ namespace ItemClassLibrary.Entity.Equipment {
                 this.RequireLevel = (!itemData.ContainsKey(Utility.HEADER_DEFINE_LV) || itemData[Utility.HEADER_DEFINE_LV] == "-") ? 1 : int.Parse(itemData[Utility.HEADER_DEFINE_LV]);
                 this.Classification = itemData[Utility.HEADER_DEFINE_CLASSIFICATION];
                 this.EquipableJobs = (!itemData.ContainsKey(Utility.HEADER_DEFINE_EQUIPABLE_JOBS) || itemData[Utility.HEADER_DEFINE_EQUIPABLE_JOBS] == Utility.ALL_JOBS) ? allJobs : itemData[Utility.HEADER_DEFINE_EQUIPABLE_JOBS].Replace(" ", "").Split(new char[] { ',' });
-                AbilityList = AbilityCalc(BasicAbility.Union(RefineAbility).Union(SpecialAbility).ToList());
+                AbilityList = AbilityCalc(BasicAbility.Concat(RefineAbility).Concat(SpecialAbility).ToList());
             }
         }
 

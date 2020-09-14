@@ -23,6 +23,7 @@ namespace ItemClassLibrary.Manage {
         string saveDirectory = @"C:\Text\";
         string saveItemFile = @"itemData.json";
         string saveAbilityFile = @"ability.json";
+        string replaceFile = @"Replace.json";
 
         List<AbilityPattern> abilityList = new List<AbilityPattern>();
 
@@ -100,15 +101,40 @@ namespace ItemClassLibrary.Manage {
         string[] itemHeaderSimple = Utility.itemHeaderSimple;
 
         List<ItemBase> m_itemList = new List<ItemBase>();
+        List<(string source, string dist)> replaceList = new List<(string source, string dist)>();
 
 
         public List<ItemBase> GetItemData() {
             return m_itemList;
         }
 
+        private void loadReplaceData() {
+            if (File.Exists(replaceFile)) {
+                replaceList = JsonConvert.DeserializeObject<List<(string source, string dist)>>(File.ReadAllText(replaceFile));
+            }
+        }
+
+        private void saveReplaceData() {
+            File.WriteAllText(replaceFile, JsonConvert.SerializeObject(replaceList));
+        }
+
+        public void addReplaceString(string source, string dist) {
+            replaceList.Add((source, dist));
+            saveReplaceData();
+        }
+
+        public string replaceText(string source) {
+            string retString = source;
+            for (int i = 0; i < replaceList.Count; i++) {
+                retString = retString.Replace(replaceList[i].source, replaceList[i].dist);
+            }
+            return retString;
+        }
+
         private ItemManager() {
             // ローカル(ネットワーク)から定義ファイルを読み込む
             // 定義ファイルを解析しアイテムリストを保持する
+            loadReplaceData();
 
             if (File.Exists(saveDirectory + saveAbilityFile)) {
                 abilityList = Utility.ReadAbilityPattern(saveDirectory + saveAbilityFile);
@@ -456,12 +482,12 @@ namespace ItemClassLibrary.Manage {
             return returnData;
         }
 
-        public (List<List<ItemBase>>, List<string>) GetEquipList(string user, string job, bool onlySetEquip, List<string> targetParts, List<string> appendParts, List<ItemBase> haveEquipList, Dictionary<string, float> needRegist, Dictionary<string, float> orbRegistList) {
-            (List<List<ItemBase>> equipList, List<string> abilityList) resultList = (new List<List<ItemBase>>(), new List<string>());
+        public (List<List<EquipmentBase>>, List<string>) GetEquipList(string user, string job, bool onlySetEquip, List<string> targetParts, List<string> appendParts, List<EquipmentBase> haveEquipList, Dictionary<string, float> needRegist, Dictionary<string, float> orbRegistList) {
+            (List<List<EquipmentBase>> equipList, List<string> abilityList) resultList = (new List<List<EquipmentBase>>(), new List<string>());
 
-            List<ItemBase> setEquips = m_itemList.Where(x => x.Classification == Utility.PARTS_SET && ((EquipmentBase)x).EquipableJobs.Contains(job)).OrderByDescending(x => ((EquipmentBase)x).RequireLevel).ToList();
+            List<EquipmentBase> setEquips = m_itemList.Where(x => x.Classification == Utility.PARTS_SET && ((EquipmentBase)x).EquipableJobs.Contains(job)).Select(x => (EquipmentBase)x).OrderByDescending(x => x.RequireLevel).ToList();
             // 選択された職のすべての装備
-            List<ItemBase> allEquips = m_itemList.Where(x => targetParts.Contains(x.Classification) && ((EquipmentBase)x).EquipableJobs.Contains(job)).OrderByDescending(x => ((EquipmentBase)x).RequireLevel).ToList();
+            List<EquipmentBase> allEquips = m_itemList.Where(x => targetParts.Contains(x.Classification) && ((EquipmentBase)x).EquipableJobs.Contains(job)).Select(x => (EquipmentBase)x).OrderByDescending(x => x.RequireLevel).ToList();
 
             if(onlySetEquip) {
                 for(int i = 0; i < setEquips.Count; i++) {
@@ -473,8 +499,8 @@ namespace ItemClassLibrary.Manage {
                     }
 
                     bool haveSet = true;
-                    List<ItemBase> haveSetList = new List<ItemBase>();
-                    for(int j = 0;j < setEquip.SetEquipList.Count; i++) {
+                    List<EquipmentBase> haveSetList = new List<EquipmentBase>();
+                    for(int j = 0;j < setEquip.SetEquipList.Count; j++) {
                         partsCheckList[setEquip.SetEquipList[j].Classification] = 1;
 
                         if (haveEquipList.Where(x => x.Name == setEquip.SetEquipList[j].Name).Count() == 0) { // 持ってない
@@ -486,7 +512,7 @@ namespace ItemClassLibrary.Manage {
                     }
 
                     if (haveSet) {
-                        (List<List<ItemBase>> equipList, List<string> abilityList) result = displayEquipSet(user, targetParts, appendParts, partsCheckList, allEquips, haveEquipList, haveSetList, needRegist, setEquip, orbRegistList);
+                        (List<List<EquipmentBase>> equipList, List<string> abilityList) result = displayEquipSet(user, targetParts, appendParts, partsCheckList, allEquips, haveEquipList, haveSetList, needRegist, setEquip, orbRegistList);
                         resultList.equipList.AddRange(result.equipList);
                         resultList.abilityList.AddRange(result.abilityList);
                     }
@@ -498,32 +524,32 @@ namespace ItemClassLibrary.Manage {
                     partsCheckList[targetParts[j]] = 0;
                 }
 
-                List<ItemBase> haveSetList = new List<ItemBase>();
-                (List<List<ItemBase>> equipList, List<string> abilityList) result = displayEquipSet(user, targetParts, appendParts, partsCheckList, allEquips, haveEquipList, haveSetList, needRegist, null, orbRegistList);
+                List<EquipmentBase> haveSetList = new List<EquipmentBase>();
+                (List<List<EquipmentBase>> equipList, List<string> abilityList) result = displayEquipSet(user, targetParts, appendParts, partsCheckList, allEquips, haveEquipList, haveSetList, needRegist, null, orbRegistList);
                 resultList.equipList.AddRange(result.equipList);
                 resultList.abilityList.AddRange(result.abilityList);
             }
             return resultList;
         }
 
-        private (List<List<ItemBase>>, List<string>) displayEquipSet(string user, List<string> bodyParts, List<string> appendParts, Dictionary<string, int> partsCheckList, List<ItemBase> allEquips, List<ItemBase> haveEquipList, List<ItemBase> haveSetList, Dictionary<string, float> targetRegistList, EquipmentGroup setEquip, Dictionary<string, float> orbRegistList) {
+        private (List<List<EquipmentBase>>, List<string>) displayEquipSet(string user, List<string> bodyParts, List<string> appendParts, Dictionary<string, int> partsCheckList, List<EquipmentBase> allEquips, List<EquipmentBase> haveEquipList, List<EquipmentBase> haveSetList, Dictionary<string, float> targetRegistList, EquipmentGroup setEquip, Dictionary<string, float> orbRegistList) {
             // セットに含まれていない装備を検索
-            List<ItemBase> nonSetList = new List<ItemBase>();
+            List<EquipmentBase> nonSetList = new List<EquipmentBase>();
             List<string> nonParts = partsCheckList.Where(x => x.Value == 0).Select(x => x.Key).ToList();
             for (int j = 0; j < nonParts.Count; j++) {
                 nonSetList.AddRange(allEquips.Where(x => x.Classification == nonParts[j]).ToList());
             }
-            nonSetList = nonSetList.OrderByDescending(x => ((EquipmentBase)x).RequireLevel).ToList();
+            nonSetList = nonSetList.OrderByDescending(x => x.RequireLevel).ToList();
             for (int j = 0; j < nonSetList.Count; j++) {
                 if (appendParts.Contains(nonSetList[j].Classification)) {
-                    haveSetList.AddRange(haveEquipList.Where(x => x.Name == nonSetList[j].Name && ((EquipmentBase)x).AbilityList.Count > 0).ToList());
+                    haveSetList.AddRange(haveEquipList.Where(x => x.Name == nonSetList[j].Name && x.AbilityList.Count > 0).ToList());
                 }
                 else {
                     haveSetList.AddRange(haveEquipList.Where(x => x.Name == nonSetList[j].Name).ToList());
                 }
             }
 
-            List<List<ItemBase>> allCheckEquipList = new List<List<ItemBase>>();
+            List<List<EquipmentBase>> allCheckEquipList = new List<List<EquipmentBase>>();
             // 手持ちの装備がそろった
 
             // すべての組み合わせを取得する
@@ -536,10 +562,10 @@ namespace ItemClassLibrary.Manage {
             List<bool> checkList = new List<bool>();
             for (int j = 0; j < allCheckEquipList.Count; j++) {
                 registList.Add(new Dictionary<string, float>());
-                List<ItemBase> equipSet = allCheckEquipList[j];
+                List<EquipmentBase> equipSet = allCheckEquipList[j];
                 Dictionary<string, float> prevTargetRegistList = new Dictionary<string, float>(targetRegistList);
                 for (int k = 0; k < equipSet.Count; k++) {
-                    EquipmentBase equip = (EquipmentBase)equipSet[k];
+                    EquipmentBase equip = equipSet[k];
                     foreach (string key in targetRegistList.Keys) {
                         if (equip.AbilityList.ContainsKey(key)) {
                             prevTargetRegistList[key] -= equip.AbilityList[key];
@@ -571,14 +597,15 @@ namespace ItemClassLibrary.Manage {
             }
 
             // 仮決め
-            List<List<ItemBase>> returnList = new List<List<ItemBase>>();
+            List<List<EquipmentBase>> returnList = new List<List<EquipmentBase>>();
             List<string> abilityList = new List<string>();
             for (int j = 0; j < checkList.Count; j++) {
                 if (checkList[j] == true) {
-                    List<ItemBase> itemList = new List<ItemBase>();
+                    List<EquipmentBase> itemList = new List<EquipmentBase>();
                     for (int k = 0; k < allCheckEquipList[j].Count; k++) {
                         itemList.Add(allCheckEquipList[j][k]);
                     }
+                    abilityList.Add("");
                     foreach (string key in registList[j].Keys) {
                         string orbString = "";
                         float orbNum = 0;
@@ -588,7 +615,7 @@ namespace ItemClassLibrary.Manage {
                                 orbString = "(宝珠" + orbRegistList[key] + ")";
                             }
                         }
-                        abilityList.Add(key + (registList[j][key] + orbNum) + orbString + "% ");
+                        abilityList[abilityList.Count -1] += key + (registList[j][key] + orbNum) + orbString + "% ";
                     }
                     returnList.Add(itemList);
                 }
@@ -597,22 +624,22 @@ namespace ItemClassLibrary.Manage {
         }
 
 
-        private void checkEquipList(List<ItemBase> haveSetList, List<string> bodyParts, List<ItemBase> setEquipList, int index, ref List<List<ItemBase>> allCheckEquipList) {
+        private void checkEquipList(List<EquipmentBase> haveSetList, List<string> bodyParts, List<EquipmentBase> setEquipList, int index, ref List<List<EquipmentBase>> allCheckEquipList) {
             if (index >= bodyParts.Count) {
                 allCheckEquipList.Add(setEquipList);
                 return;
             }
 
             if (setEquipList == null) {
-                setEquipList = new List<ItemBase>();
+                setEquipList = new List<EquipmentBase>();
             }
             int prevIndex = index;
-            List<ItemBase> prevList = new List<ItemBase>(setEquipList);
+            List<EquipmentBase> prevList = new List<EquipmentBase>(setEquipList);
             string nowParts = bodyParts[index];
-            List<ItemBase> partsList = haveSetList.Where(x => x.Classification == nowParts).ToList();
+            List<EquipmentBase> partsList = haveSetList.Where(x => x.Classification == nowParts).ToList();
             for (int i = 0; i < partsList.Count; i++) {
                 index = prevIndex;
-                setEquipList = new List<ItemBase>(prevList);
+                setEquipList = new List<EquipmentBase>(prevList);
                 setEquipList.Add(partsList[i]);
                 checkEquipList(haveSetList, bodyParts, setEquipList, ++index, ref allCheckEquipList);
             }

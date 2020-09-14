@@ -70,6 +70,40 @@ namespace ItemClassLibrary.Util {
         public static string ITEM_FURNITURE = "家具";
         public static string ITEM_GARDEN = "庭具";
 
+        public static string REGIST_PALSY = "マヒ";
+        public static string REGIST_CONFUSE = "混乱";
+        public static string REGIST_SEALED = "封印";
+        public static string REGIST_ILLUSION = "幻惑";
+        public static string REGIST_POISON = "どく";
+        public static string REGIST_SLEEP = "眠り";
+        public static string REGIST_DEATH = "即死";
+        public static string REGIST_CURSE = "呪い";
+        public static string REGIST_MPDRAIN = "MP吸収";
+        public static string REGIST_FALL = "転び";
+        public static string REGIST_DANCE = "踊り";
+        public static string REGIST_FIER = "おびえ";
+        public static string REGIST_BIND = "しばり";
+        public static string REGIST_CHARM = "魅了";
+
+
+        public static string[] REGIST_LIST = new string[] {
+            REGIST_PALSY,
+            REGIST_CONFUSE,
+            REGIST_SEALED,
+            REGIST_ILLUSION,
+            REGIST_POISON,
+            REGIST_SLEEP,
+            REGIST_DEATH,
+            REGIST_CURSE,
+            REGIST_MPDRAIN,
+            REGIST_FALL,
+            REGIST_DANCE,
+            REGIST_FIER,
+            REGIST_BIND,
+            REGIST_CHARM,
+        };
+
+
         public static string[] EQUIP_CATEGORY_LIST = new string[] {
             PARTS_HEAD,
             PARTS_UPPERBODY,
@@ -400,7 +434,7 @@ namespace ItemClassLibrary.Util {
                 }
                 int refine = 0;
                 string itemName = GetNearlyString(name, defineList.Select(x => x.Name).ToList()).FirstOrDefault();
-                string refineString = name.Replace(itemName, "");
+                string refineString = name.Substring(name.IndexOf("+"));
                 if(refineString.Length > 0) {
                     refine = int.Parse(refineString);
                 }

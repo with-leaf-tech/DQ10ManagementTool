@@ -34,8 +34,19 @@ namespace DQ10ManagementTool {
         private string saveItemFile = @"ItemData.json";
         private string saveEquipFile = @"EquipData.json";
 
+        private bool updateMode = false;
+
         public EntryForm() {
             InitializeComponent();
+        }
+
+        public DialogResult ShowEntry() {
+            updateMode = false;
+            return ShowDialog();
+        }
+        public DialogResult ShowUpdate() {
+            updateMode = true;
+            return ShowDialog();
         }
 
         public void SetItems(int id, List<ItemBase> items, List<ItemBase> itemList) {
@@ -54,6 +65,12 @@ namespace DQ10ManagementTool {
         }
 
         private void EntryForm_Load(object sender, EventArgs e) {
+            Controls.Clear();
+            nameLabel.Clear();
+            nameTextBox.Clear();
+            nameComboBox.Clear();
+            itemCountNum.Clear();
+
             if (Utility.EQUIP_CATEGORY_LIST.Contains(entryItems[0].Classification)) {
                 int index = 0;
                 EquipmentBase equip = (EquipmentBase)entryItems[0];
@@ -110,10 +127,10 @@ namespace DQ10ManagementTool {
                 nameLabel[nameLabel.Count - 1].Location = new Point(10, 10 + index * 30);
 
                 itemCountNum.Add(new NumericUpDown());
-                itemCountNum[itemCountNum.Count - 1].Name = "itemCountNum" + index;
-                itemCountNum[itemCountNum.Count - 1].Value = equip.Refine;
                 itemCountNum[itemCountNum.Count - 1].Minimum = 0;
                 itemCountNum[itemCountNum.Count - 1].Maximum = 5;
+                itemCountNum[itemCountNum.Count - 1].Name = "itemCountNum" + index;
+                itemCountNum[itemCountNum.Count - 1].Value = equip.Refine;
                 itemCountNum[itemCountNum.Count - 1].Size = new Size(50, 13);
                 itemCountNum[itemCountNum.Count - 1].Location = new Point(100, 8 + index * 30);
                 index++;
@@ -124,10 +141,10 @@ namespace DQ10ManagementTool {
                 nameLabel[nameLabel.Count - 1].Location = new Point(10, 10 + index * 30);
 
                 itemCountNum.Add(new NumericUpDown());
-                itemCountNum[itemCountNum.Count - 1].Name = "itemCountNum" + index;
-                itemCountNum[itemCountNum.Count - 1].Value = equip.RequireLevel;
                 itemCountNum[itemCountNum.Count - 1].Minimum = 1;
                 itemCountNum[itemCountNum.Count - 1].Maximum = 1000;
+                itemCountNum[itemCountNum.Count - 1].Name = "itemCountNum" + index;
+                itemCountNum[itemCountNum.Count - 1].Value = equip.RequireLevel;
                 itemCountNum[itemCountNum.Count - 1].Size = new Size(50, 13);
                 itemCountNum[itemCountNum.Count - 1].Location = new Point(100, 8 + index * 30);
                 index++;
@@ -231,6 +248,17 @@ namespace DQ10ManagementTool {
                 Controls.Add(entryButton);
                 Controls.Add(cancelButton);
 
+                if (updateMode) {
+                    deleteButton.Text = "削除";
+                    deleteButton.Size = new Size(80, 20);
+                    deleteButton.Location = new Point(260, 10 + index * 30);
+                    deleteButton.Click += DeleteButton_Click;
+
+                    entryButton.Text = "更新";
+                    Controls.Add(deleteButton);
+                }
+
+
                 this.Size = new Size(560, 80 + index * 30);
                 this.ActiveControl = entryButton;
             }
@@ -256,10 +284,10 @@ namespace DQ10ManagementTool {
                     nameComboBox[i].Location = new Point(210, 8 + i * 30);
 
                     itemCountNum.Add(new NumericUpDown());
-                    itemCountNum[i].Name = "itemCountNum" + i;
-                    itemCountNum[i].Value = entryItems[i].count;
                     itemCountNum[i].Minimum = 1;
                     itemCountNum[i].Maximum = 99;
+                    itemCountNum[i].Name = "itemCountNum" + i;
+                    itemCountNum[i].Value = entryItems[i].count;
                     itemCountNum[i].Size = new Size(50, 13);
                     itemCountNum[i].Location = new Point(370, 8 + i * 30);
                 }
@@ -271,17 +299,68 @@ namespace DQ10ManagementTool {
                 entryButton.Text = "登録";
                 entryButton.Size = new Size(80, 20);
                 entryButton.Location = new Point(250, 10 + entryItems.Count * 30);
+                entryButton.Click += EntryButton_Click;
 
                 cancelButton.Text = "キャンセル";
                 cancelButton.Size = new Size(80, 20);
                 cancelButton.Location = new Point(340, 10 + entryItems.Count * 30);
+                cancelButton.Click += CancelButton_Click;
 
                 Controls.Add(entryButton);
                 Controls.Add(cancelButton);
 
+                if (updateMode) {
+                    deleteButton.Text = "削除";
+                    deleteButton.Size = new Size(80, 20);
+                    deleteButton.Location = new Point(160, 10 + entryItems.Count * 30);
+                    deleteButton.Click += DeleteButton_Click;
+
+                    entryButton.Text = "更新";
+                    Controls.Add(deleteButton);
+                }
+
+
                 this.Size = new Size(460, 80 + entryItems.Count * 30);
                 this.ActiveControl = entryButton;
             }
+        }
+
+        private void DeleteButton_Click(object sender, EventArgs e) {
+            if (Utility.EQUIP_CATEGORY_LIST.Contains(entryItems[0].Classification)) {
+                EquipmentBase equip = (EquipmentBase)entryItems[0];
+                EquipmentBase prevEquip = equip.Clone();
+
+                // 削除する
+                List<EquipmentBase> equipList = new List<EquipmentBase>();
+                if (File.Exists(userId + "_" + saveEquipFile)) {
+                    equipList = JsonConvert.DeserializeObject<List<EquipmentBase>>(File.ReadAllText(userId + "_" + saveEquipFile));
+                }
+                if (updateMode) {
+                    string itemName = prevEquip.Name;
+                    string ability = string.Join(" ", prevEquip.RefineAbility) + " " + string.Join(" ", prevEquip.SpecialAbility);
+                    equipList.Remove(equipList.Where(x => x.Name == itemName && string.Join(" ", x.RefineAbility) + " " + string.Join(" ", x.SpecialAbility) == ability).First());
+                }
+                File.WriteAllText(userId + "_" + saveEquipFile, JsonConvert.SerializeObject(equipList));
+            }
+            else {
+                if(MessageBox.Show("以下全て削除されます！", "確認", MessageBoxButtons.OKCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) == DialogResult.OK) {
+                    string updateItemName = entryItems[0].Name;
+
+                    // 削除する
+                    List<Item> itemList = new List<Item>();
+                    if (File.Exists(userId + "_" + saveItemFile)) {
+                        itemList = JsonConvert.DeserializeObject<List<Item>>(File.ReadAllText(userId + "_" + saveItemFile));
+                    }
+                    if (updateMode) {
+                        itemList.RemoveAll(x => x.Name == updateItemName);
+                    }
+                    File.WriteAllText(userId + "_" + saveItemFile, JsonConvert.SerializeObject(itemList));
+                }
+                else {
+                    return;
+                }
+            }
+            this.Hide();
         }
 
         private void CancelButton_Click(object sender, EventArgs e) {
@@ -292,6 +371,7 @@ namespace DQ10ManagementTool {
             int index = 0;
             if (Utility.EQUIP_CATEGORY_LIST.Contains(entryItems[0].Classification)) {
                 EquipmentBase equip = (EquipmentBase)entryItems[0];
+                EquipmentBase prevEquip = equip.Clone();
 
                 Control[] control = this.Controls.Find("nameComboBox" + index, true);
                 equip.Name = ((ComboBox)control[0]).SelectedItem.ToString();
@@ -330,17 +410,24 @@ namespace DQ10ManagementTool {
                     equip.SpecialAbility[i] = ((ComboBox)control[0]).SelectedItem.ToString();
                     index++;
                 }
+                equip.AbilityList = equip.AbilityCalc(equip.BasicAbility.Concat(equip.RefineAbility).Concat(equip.SpecialAbility).ToList());
 
                 // 登録する
                 List<EquipmentBase> equipList = new List<EquipmentBase>();
                 if (File.Exists(userId + "_" + saveEquipFile)) {
                     equipList = JsonConvert.DeserializeObject<List<EquipmentBase>>(File.ReadAllText(userId + "_" + saveEquipFile));
                 }
+                if(updateMode) {
+                    string itemName = prevEquip.Name;
+                    string ability = string.Join(" ", prevEquip.RefineAbility) + " " + string.Join(" ", prevEquip.SpecialAbility);
+                    equipList.Remove(equipList.Where(x => x.Name == itemName && string.Join(" ", x.RefineAbility) + " " + string.Join(" ", x.SpecialAbility) == ability).First());
+                }
                 equipList.Add(equip);
                 File.WriteAllText(userId + "_" + saveEquipFile, JsonConvert.SerializeObject(equipList));
             }
             else {
                 List<Item> entryItemData = new List<Item>();
+                string updateItemName = entryItems[0].Name;
                 for (int i = 0; i < entryItems.Count; i++) {
                     Control[] control = this.Controls.Find("nameComboBox" + index, true);
                     entryItems[i].Name = ((ComboBox)control[0]).SelectedItem.ToString();
@@ -356,8 +443,11 @@ namespace DQ10ManagementTool {
                 if (File.Exists(userId + "_" + saveItemFile)) {
                     itemList = JsonConvert.DeserializeObject<List<Item>>(File.ReadAllText(userId + "_" + saveItemFile));
                 }
+                if (updateMode) {
+                    itemList.RemoveAll(x => x.Name == updateItemName);
+                }
                 itemList.AddRange(entryItemData);
-                File.WriteAllText(userId + "_" + saveEquipFile, JsonConvert.SerializeObject(itemList));
+                File.WriteAllText(userId + "_" + saveItemFile, JsonConvert.SerializeObject(itemList));
             }
             this.Hide();
         }

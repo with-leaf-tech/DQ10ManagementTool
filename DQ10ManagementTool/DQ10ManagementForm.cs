@@ -87,6 +87,17 @@ namespace DQ10ManagementTool {
             loadSetting();
             loadUserData();
 
+            jobListBox.Items.AddRange(Utility.allJobs);
+
+            for(int i = 0; i < Utility.REGIST_LIST.Length; i++) {
+                Control[] comboBox = this.Controls.Find("registComboBox" + string.Format("{0:00}", (i + 1)), true);
+                ((ComboBox)comboBox[0]).Items.Add(Utility.REGIST_LIST[i] + "ガード 指定なし");
+                for (int j = 0; j < 10; j++) {
+                    ((ComboBox)comboBox[0]).Items.Add(Utility.REGIST_LIST[i] + "ガード " + ((j+1) * 10) + "%以上");
+                }
+                ((ComboBox)comboBox[0]).SelectedIndex = 0;
+            }
+
             searchEquipRadioButton.Checked = true;
             selectUserRadioButton.Checked = true;
 
@@ -294,6 +305,7 @@ namespace DQ10ManagementTool {
         private void GetOCRTest() {
             Bitmap img = new Bitmap(imageFileName);
             string text = ocr.GetTextFromImage(img).Replace("\n", "\r\n");
+            text = itemManager.replaceText(text);
             img.Dispose();
 
             int userId = userList.Where(x => x.name == userListBox.SelectedItem.ToString()).First().id;
@@ -356,24 +368,25 @@ namespace DQ10ManagementTool {
 
         private void debug_button_Click(object sender, EventArgs e) {
             string text = @"
-の鉄壁のすねあて+3
-足レア度 B
+カテドラルロープ+3 ★★★
+からE上レア度 B
 使い込み。店売り不可
-敵の猛攻撃にも
-びくともしない
-堅牢なすねあて
-Lv 96以上装備可
-錬金石D青の練金石
+神に身を捧げた
+高德の聖職者を
+守護する法衣
+Lv 99以上装備可
 追加効果
-錬金効果:おもさ+15(-10)
-錬金効果:おもさ+15(+2)
-錬金効果:転びガード+90(-81)%
-できのよさ:すばやさ +3
+錬金石D赤の錬金石
+錬金効果:おもさ+15
+錬金効果:呪いガード+60%
+錬金効果:呪いガード+60%
+できのよさ: しゅびカ +4
 戦士 僧侶 魔使 武闘 盗賊 旅芸 バト パラ 魔戦 レン 賢者 スパ
 まも どう 踊り 占い 天地 遊び デス
 0錬金強化を見る
 O装備できる仲間モンスターを見る
 ";
+            text = itemManager.replaceText(text);
             int userId = userList.Where(x => x.name == userListBox.SelectedItem.ToString()).First().id;
             List<ItemBase> analyzeData = Utility.AnalyzeItem(userId, text, itemManager.GetItemData());
             string analyzeText = "";
@@ -410,7 +423,7 @@ O装備できる仲間モンスターを見る
             }
             int userId = userList.Where(x => x.name == userListBox.SelectedItem.ToString()).First().id;
             entryWindow.SetItems(userId, entryItems, defineItemData);
-            entryWindow.ShowDialog();
+            entryWindow.ShowEntry();
         }
 
         private void displaySearchCategory() {
@@ -479,7 +492,8 @@ O装備できる仲間モンスターを見る
                             equipList.AddRange(JsonConvert.DeserializeObject<List<EquipmentBase>>(File.ReadAllText(userIdList[i] + "_" + saveEquipFile)));
                         }
                     }
-                    searchResultListBox.Items.AddRange(equipList.Where(x => x.Classification == searchPartsListBox.SelectedItem.ToString() && x.Name == searchAbilityListBox.SelectedItem.ToString()).Select(x => nameDic[x.OwnerId] + "\t" + x.Name).ToArray());
+                    List<EquipmentBase> displayList = equipList.Where(x => x.Classification == searchPartsListBox.SelectedItem.ToString() && x.Name == searchAbilityListBox.SelectedItem.ToString()).ToList();
+                    searchResultListBox.Items.AddRange(displayList.Select(x => nameDic[x.OwnerId] + "\t" + x.Name + "\t" + string.Join(" ", x.RefineAbility) + " " + string.Join(" ", x.SpecialAbility)).ToArray());
                 }
                 else {
                     List<Item> itemList = new List<Item>();
@@ -488,7 +502,9 @@ O装備できる仲間モンスターを見る
                             itemList.AddRange(JsonConvert.DeserializeObject<List<Item>>(File.ReadAllText(userIdList[i] + "_" + saveItemFile)));
                         }
                     }
-                    searchResultListBox.Items.AddRange(itemList.Where(x => x.Classification == searchPartsListBox.SelectedItem.ToString() && x.Name == searchAbilityListBox.SelectedItem.ToString()).Select(x => nameDic[x.OwnerId] + "\t" + x.Name).ToArray());
+                    List<Item> displayList = itemList.Where(x => x.Classification == searchPartsListBox.SelectedItem.ToString() && x.Name == searchAbilityListBox.SelectedItem.ToString()).ToList();
+                    searchResultListBox.Items.AddRange(displayList.Select(x => nameDic[x.OwnerId] + "\t" + x.Name + " " + x.count + "個").ToArray());
+                    searchResultListBox.Items.Add("　合計" + displayList.Select(x => x.count).Sum() + "個");
                 }
             }
 
@@ -514,5 +530,98 @@ O装備できる仲間モンスターを見る
         private void searchPartsListBox_SelectedIndexChanged(object sender, EventArgs e) {
             displaySearchList();
         }
+
+        private void searchResultListBox_DoubleClick(object sender, EventArgs e) {
+            if(searchResultListBox.SelectedIndex < 0) {
+                return;
+            }
+
+            string[] data = searchResultListBox.SelectedItem.ToString().Split(new char[] { '\t' });
+            if(data.Length < 2) {
+                return;
+            }
+            string userName = data[0];
+            string itemName = data[1];
+            if(itemName.Contains(" ")) {
+                itemName = itemName.Split(new char[] { ' ' })[0];
+            }
+            int userId = userList.Where(x => x.name == userName).First().id;
+
+            List<ItemBase> updateList = new List<ItemBase>();
+            if(Utility.EQUIP_CATEGORY_LIST.Contains(defineItemData.Where(x => x.Name == itemName).Select(x => x.Classification).First())) {
+                string ability = data[2];
+                List<EquipmentBase> itemdata = JsonConvert.DeserializeObject<List<EquipmentBase>>(File.ReadAllText(userId + "_" + saveEquipFile));
+                updateList = itemdata.Where(x => x.Name == itemName && string.Join(" ", x.RefineAbility) + " " + string.Join(" ", x.SpecialAbility) == ability).ToList<ItemBase>();
+            }
+            else {
+                List<Item> itemdata = JsonConvert.DeserializeObject<List<Item>>(File.ReadAllText(userId + "_" + saveItemFile));
+                updateList = itemdata.Where(x => x.Name == itemName).ToList<ItemBase>();
+            }
+
+            entryWindow.SetItems(userId, updateList, defineItemData);
+            entryWindow.ShowUpdate();
+        }
+
+        private void searchRegistButton_Click(object sender, EventArgs e) {
+            searchResultListBox.Items.Clear();
+            string user = userListBox.SelectedItem.ToString(); // 未使用
+            string job = jobListBox.SelectedItem.ToString();
+            bool onlySetEquip = setOnlyCheckBox.Checked;
+            List<string> targetParts = (new string[] { Utility.PARTS_HEAD, Utility.PARTS_UPPERBODY, Utility.PARTS_LOWERBODY, Utility.PARTS_LEG }).ToList();
+            List<string> appendParts = new List<string>();
+            if(includeSheildCheckBox.Checked) {
+                appendParts.Add(Utility.PARTS_SHIELD);
+            }
+            if(includeFaceCheckBox.Checked) {
+                appendParts.Add(Utility.PARTS_ACCESSORY_FACE);
+            }
+            if (includeFingerCheckBox.Checked) {
+                appendParts.Add(Utility.PARTS_ACCESSORY_FINGER);
+            }
+            if (includeWaistCheckBox.Checked) {
+                appendParts.Add(Utility.PARTS_ACCESSORY_WAIST);
+            }
+            if (includeOtherCheckBox.Checked) {
+                appendParts.Add(Utility.PARTS_ACCESSORY_OTHER);
+            }
+
+            int userId = userList.Where(x => x.name == user).First().id;
+            List<EquipmentBase> haveEquipList = JsonConvert.DeserializeObject<List<EquipmentBase>>(File.ReadAllText(userId + "_" + saveEquipFile));
+
+            Dictionary<string, float> needRegist = new Dictionary<string, float>();
+            Dictionary<string, float> orbRegistList = new Dictionary<string, float>();
+            for (int i = 0; i < Utility.REGIST_LIST.Length; i++) {
+                Control[] comboBox = this.Controls.Find("registComboBox" + string.Format("{0:00}", (i + 1)), true);
+                Control[] numericBox = this.Controls.Find("registOrbNum" + string.Format("{0:00}", (i + 1)), true);
+                string[] regist = ((ComboBox)comboBox[0]).SelectedItem.ToString().Split(new char[] { ' ' });
+                if (regist.Length > 1 && regist[1].Contains("%以上")) {
+                    needRegist.Add(regist[0], float.Parse(regist[1].Replace("%以上", "")));
+                    orbRegistList.Add(regist[0], float.Parse(((NumericUpDown)numericBox[0]).Value.ToString()));
+                }
+            }
+
+            (List<List<EquipmentBase>> returnList, List<string> abilityList) list = itemManager.GetEquipList(user, job, onlySetEquip, targetParts, appendParts, haveEquipList, needRegist, orbRegistList);
+
+            StringBuilder sb = new StringBuilder();
+
+            for(int i = 0; i < list.returnList.Count; i++) {
+                List<EquipmentBase> setEquip = list.returnList[i];
+                string ability = list.abilityList[i];
+                sb.Append("　" + (i+1) + "件目" + Environment.NewLine);
+                for (int j = 0; j < setEquip.Count; j++) {
+                    sb.Append(user + "\t" + setEquip[j].Name + "\t" + string.Join(" ", setEquip[j].RefineAbility) + " " + string.Join(" ", setEquip[j].SpecialAbility) + Environment.NewLine);
+                }
+                sb.Append("　全体の耐性 " + ability + Environment.NewLine + Environment.NewLine);
+            }
+
+            searchResultListBox.Items.AddRange(sb.ToString().Split(new string[] { Environment.NewLine }, StringSplitOptions.None));
+
+        }
+
+        private void replaceAddButton_Click(object sender, EventArgs e) {
+            itemManager.addReplaceString(replaceSourceTextBox.Text, replaceDistTextBox.Text);
+        }
+
+
     }
 }
