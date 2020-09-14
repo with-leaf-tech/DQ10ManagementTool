@@ -23,6 +23,7 @@
         /// コード エディターで変更しないでください。
         /// </summary>
         private void InitializeComponent() {
+            this.components = new System.ComponentModel.Container();
             this.numericUpDownTop = new System.Windows.Forms.NumericUpDown();
             this.numericUpDownLeft = new System.Windows.Forms.NumericUpDown();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
@@ -111,6 +112,7 @@
             this.replaceSourceTextBox = new System.Windows.Forms.TextBox();
             this.replaceDistTextBox = new System.Windows.Forms.TextBox();
             this.replaceAddButton = new System.Windows.Forms.Button();
+            this.timer1 = new System.Windows.Forms.Timer(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownTop)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownLeft)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -487,6 +489,7 @@
             this.autoCaptureTextStopButton.TabIndex = 15;
             this.autoCaptureTextStopButton.Text = "停止";
             this.autoCaptureTextStopButton.UseVisualStyleBackColor = true;
+            this.autoCaptureTextStopButton.Click += new System.EventHandler(this.autoCaptureTextStopButton_Click);
             // 
             // autoCaptureTextStartButton
             // 
@@ -496,6 +499,7 @@
             this.autoCaptureTextStartButton.TabIndex = 14;
             this.autoCaptureTextStartButton.Text = "連続取り込み";
             this.autoCaptureTextStartButton.UseVisualStyleBackColor = true;
+            this.autoCaptureTextStartButton.Click += new System.EventHandler(this.autoCaptureTextStartButton_Click);
             // 
             // autoCaptureInterval
             // 
@@ -1184,6 +1188,10 @@
             this.replaceAddButton.UseVisualStyleBackColor = true;
             this.replaceAddButton.Click += new System.EventHandler(this.replaceAddButton_Click);
             // 
+            // timer1
+            // 
+            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
+            // 
             // DQ10ManagementForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -1348,6 +1356,7 @@
         private System.Windows.Forms.Button replaceAddButton;
         private System.Windows.Forms.TextBox replaceDistTextBox;
         private System.Windows.Forms.TextBox replaceSourceTextBox;
+        private System.Windows.Forms.Timer timer1;
     }
 }
 

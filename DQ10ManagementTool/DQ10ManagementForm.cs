@@ -308,6 +308,17 @@ namespace DQ10ManagementTool {
             text = itemManager.replaceText(text);
             img.Dispose();
 
+            if (InvokeRequired) {
+                Invoke((MethodInvoker)delegate {
+                    OcrMain(text);
+                });
+            }
+            else {
+                OcrMain(text);
+            }
+        }
+
+        private void OcrMain(string text) {
             int userId = userList.Where(x => x.name == userListBox.SelectedItem.ToString()).First().id;
             List<ItemBase> analyzeData = Utility.AnalyzeItem(userId, text, itemManager.GetItemData());
             string analyzeText = "";
@@ -319,21 +330,10 @@ namespace DQ10ManagementTool {
             }
             entryItems = analyzeData;
 
-            if (InvokeRequired) {
-                Invoke((MethodInvoker)delegate {
-                    captureTextBox.Text = text;
-                    analyzeTextBox.Text = analyzeText;
+            captureTextBox.Text = text;
+            analyzeTextBox.Text = analyzeText;
 
-                    logger.Info("読み取り結果：" + Environment.NewLine + captureTextBox.Text);
-                });
-            }
-            else {
-                captureTextBox.Text = text;
-                analyzeTextBox.Text = analyzeText;
-
-                logger.Info("読み取り結果：" + Environment.NewLine + captureTextBox.Text);
-            }
-
+            logger.Info("読み取り結果：" + Environment.NewLine + captureTextBox.Text);
         }
 
         private string DisplayEquip(EquipmentBase equip) {
@@ -622,6 +622,20 @@ O装備できる仲間モンスターを見る
             itemManager.addReplaceString(replaceSourceTextBox.Text, replaceDistTextBox.Text);
         }
 
+        private void autoCaptureTextStartButton_Click(object sender, EventArgs e) {
+            timer1.Interval = int.Parse(autoCaptureInterval.Value.ToString()) * 1000;
+            timer1.Enabled = true;
+        }
 
+        private void autoCaptureTextStopButton_Click(object sender, EventArgs e) {
+            timer1.Enabled = false;
+        }
+
+        private void timer1_Tick(object sender, EventArgs e) {
+            timer1.Enabled = false;
+            captureTextButton_Click(null, null);
+            entryButton_Click(null, null);
+            timer1.Enabled = true;
+        }
     }
 }
