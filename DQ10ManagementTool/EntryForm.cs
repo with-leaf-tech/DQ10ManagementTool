@@ -29,10 +29,13 @@ namespace DQ10ManagementTool {
         private Button cancelButton = new Button();
         private Button updateButton = new Button();
         private Button deleteButton = new Button();
+        private PictureBox pictureArea = new PictureBox();
 
         private int userId = -1;
         private string saveItemFile = @"ItemData.json";
         private string saveEquipFile = @"EquipData.json";
+        private string imageFileName = "";
+        private Bitmap screenShot = null;
 
         private bool updateMode = false;
 
@@ -49,14 +52,18 @@ namespace DQ10ManagementTool {
             return ShowDialog();
         }
 
-        public void SetItems(int id, List<ItemBase> items, List<ItemBase> itemList) {
+        public void SetItems(int id, List<ItemBase> items, List<ItemBase> itemList, string imageFile) {
             userId = id;
             entryItems = items;
             allitemList = itemList;
+            imageFileName = imageFile;
 
             if (Utility.EQUIP_CATEGORY_LIST.Contains(entryItems[0].Classification)) {
                 defineList = allitemList.Where(x => Utility.EQUIP_CATEGORY_LIST.Contains(x.Classification)).ToList();
-
+                if(imageFile == null) {
+                    EquipmentBase equip = (EquipmentBase)items[0];
+                    screenShot = Utility.DeSerializeBitmap(equip.Screenshot);
+                }
             }
             else {
                 defineList = allitemList.Where(x => Utility.ITEM_CATEGORY_LIST.Contains(x.Classification)).ToList();
@@ -235,23 +242,36 @@ namespace DQ10ManagementTool {
                 Controls.AddRange(nameComboBox.ToArray());
                 Controls.AddRange(itemCountNum.ToArray());
 
+                if(imageFileName != null) {
+                    pictureArea.Image = new Bitmap(imageFileName);
+                }
+                else {
+                    if(screenShot != null) {
+                        pictureArea.Image = screenShot;
+                    }
+                }
+                pictureArea.SizeMode = PictureBoxSizeMode.StretchImage;
+                pictureArea.Size = new Size(320, 280);
+                pictureArea.Location = new Point(550, 10);
+
                 entryButton.Text = "登録";
                 entryButton.Size = new Size(80, 20);
-                entryButton.Location = new Point(350, 10 + index * 30);
+                entryButton.Location = new Point(690, 10 + index * 30);
                 entryButton.Click += EntryButton_Click;
 
                 cancelButton.Text = "キャンセル";
                 cancelButton.Size = new Size(80, 20);
-                cancelButton.Location = new Point(440, 10 + index * 30);
+                cancelButton.Location = new Point(780, 10 + index * 30);
                 cancelButton.Click += CancelButton_Click;
 
                 Controls.Add(entryButton);
                 Controls.Add(cancelButton);
+                Controls.Add(pictureArea);
 
                 if (updateMode) {
                     deleteButton.Text = "削除";
                     deleteButton.Size = new Size(80, 20);
-                    deleteButton.Location = new Point(260, 10 + index * 30);
+                    deleteButton.Location = new Point(600, 10 + index * 30);
                     deleteButton.Click += DeleteButton_Click;
 
                     entryButton.Text = "更新";
@@ -259,7 +279,7 @@ namespace DQ10ManagementTool {
                 }
 
 
-                this.Size = new Size(560, 80 + index * 30);
+                this.Size = new Size(900, 80 + index * 30);
                 this.ActiveControl = entryButton;
             }
             else {
@@ -296,14 +316,21 @@ namespace DQ10ManagementTool {
                 Controls.AddRange(nameComboBox.ToArray());
                 Controls.AddRange(itemCountNum.ToArray());
 
+                if (imageFileName != null) {
+                    pictureArea.Image = new Bitmap(imageFileName);
+                }
+                pictureArea.SizeMode = PictureBoxSizeMode.StretchImage;
+                pictureArea.Size = new Size(320, 280);
+                pictureArea.Location = new Point(550, 10);
+
                 entryButton.Text = "登録";
                 entryButton.Size = new Size(80, 20);
-                entryButton.Location = new Point(250, 10 + entryItems.Count * 30);
+                entryButton.Location = new Point(590, 10 + entryItems.Count * 30);
                 entryButton.Click += EntryButton_Click;
 
                 cancelButton.Text = "キャンセル";
                 cancelButton.Size = new Size(80, 20);
-                cancelButton.Location = new Point(340, 10 + entryItems.Count * 30);
+                cancelButton.Location = new Point(680, 10 + entryItems.Count * 30);
                 cancelButton.Click += CancelButton_Click;
 
                 Controls.Add(entryButton);
@@ -312,7 +339,7 @@ namespace DQ10ManagementTool {
                 if (updateMode) {
                     deleteButton.Text = "削除";
                     deleteButton.Size = new Size(80, 20);
-                    deleteButton.Location = new Point(160, 10 + entryItems.Count * 30);
+                    deleteButton.Location = new Point(500, 10 + entryItems.Count * 30);
                     deleteButton.Click += DeleteButton_Click;
 
                     entryButton.Text = "更新";
@@ -320,7 +347,7 @@ namespace DQ10ManagementTool {
                 }
 
 
-                this.Size = new Size(460, 80 + entryItems.Count * 30);
+                this.Size = new Size(800, 80 + entryItems.Count * 30);
                 this.ActiveControl = entryButton;
             }
         }
@@ -411,6 +438,7 @@ namespace DQ10ManagementTool {
                     index++;
                 }
                 equip.AbilityList = equip.AbilityCalc(equip.BasicAbility.Concat(equip.RefineAbility).Concat(equip.SpecialAbility).ToList());
+                equip.Screenshot = Utility.SerializeBitmap(new Bitmap(imageFileName));
 
                 // 登録する
                 List<EquipmentBase> equipList = new List<EquipmentBase>();

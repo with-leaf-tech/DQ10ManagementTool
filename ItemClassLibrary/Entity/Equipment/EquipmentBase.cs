@@ -2,12 +2,14 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace ItemClassLibrary.Entity.Equipment {
     public class EquipmentBase : ItemBase {
+        private string _bitmap = "";
         public int Refine { get; set; }
         public int RequireLevel { get; set; }
         public string[] EquipableJobs { get; set; }
@@ -16,6 +18,8 @@ namespace ItemClassLibrary.Entity.Equipment {
         public List<string> SpecialAbility { get; set; } // 伝承、秘石、鬼石効果
         public List<string> AbilityPattern { get; set; } // この装備で有効な錬金、合成効果の一覧
         public Dictionary<string, float> AbilityList { get; set; }
+
+        public string Screenshot { set; get; }
 
         public virtual EquipmentBase Clone() {
             return JsonConvert.DeserializeObject<EquipmentBase>(JsonConvert.SerializeObject(this));

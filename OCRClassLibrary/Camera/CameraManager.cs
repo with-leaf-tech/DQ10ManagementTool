@@ -23,8 +23,8 @@ namespace OCRClassLibrary.Camera {
             cap.CloseInterfaces();
         }
 
-        public Bitmap CaptureImage() {
-            return cap.CaptureImage();
+        public Bitmap CaptureImage(string imageFileName) {
+            return cap.CaptureImage(imageFileName);
         }
     }
 }

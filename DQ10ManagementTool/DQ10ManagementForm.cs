@@ -190,45 +190,90 @@ namespace DQ10ManagementTool {
         }
 
         private void captureRadio_CheckedChanged(object sender, EventArgs e) {
+            if(captureRadioCamera.Checked) {
+                CameraInitilize();
+            }
+            else {
+                CameraRelease();
+            }
+
             screenCapture();
         }
 
         private void screenCapture() {
-            if (noCaptureCheckBox.Checked == false) {
-                if (captureRadioDisplay.Checked) {
-                    this.SendToBack();
+            try {
+                if (noCaptureCheckBox.Checked == false) {
+                    if (captureRadioDisplay.Checked) {
+                        this.SendToBack();
 
-                    // スクリーンショット
-                    Bitmap captureImage = new System.Drawing.Bitmap((int)numericUpDownRight.Value, (int)numericUpDownBottom.Value);
-                    //Graphicsの作成
-                    Graphics g = Graphics.FromImage(captureImage);
-                    //画面全体をコピーする
-                    g.CopyFromScreen(new Point((int)numericUpDownLeft.Value, (int)numericUpDownTop.Value), new Point(0, 0), captureImage.Size);
-                    //解放
-                    g.Dispose();
+                        // スクリーンショット
+                        Bitmap captureImage = new System.Drawing.Bitmap((int)numericUpDownRight.Value, (int)numericUpDownBottom.Value);
+                        //Graphicsの作成
+                        Graphics g = Graphics.FromImage(captureImage);
+                        //画面全体をコピーする
+                        g.CopyFromScreen(new Point((int)numericUpDownLeft.Value, (int)numericUpDownTop.Value), new Point(0, 0), captureImage.Size);
+                        //解放
+                        g.Dispose();
 
-                    captureImage.Save(imageFileName);
+                        captureImage.Save(imageFileName);
 
-                    //表示
-                    pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
-                    pictureBox1.Image = captureImage;
+                        //表示
+                        pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
+                        pictureBox1.Image = captureImage;
 
-                    this.TopMost = true;
-                    this.TopMost = false;
+                        this.TopMost = true;
+                        this.TopMost = false;
+                    }
+                    else {
+                        if (InvokeRequired) {
+                            Invoke((MethodInvoker)delegate {
+                                //camera.CameraStart(comboBoxDevice.SelectedIndex);
+
+                                Bitmap captureImage = camera.CaptureImage(imageFileName);
+                                //Graphicsの作成
+                                Graphics g = Graphics.FromImage(captureImage);
+                                //画面全体をコピーする
+                                g.CopyFromScreen(new Point((int)numericUpDownLeft.Value, (int)numericUpDownTop.Value), new Point(0, 0), new Size((int)numericUpDownRight.Value, (int)numericUpDownBottom.Value));
+                                //解放
+                                g.Dispose();
+
+                                //表示
+                                pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
+                                pictureBox1.Image = captureImage;
+                                //camera.CameraEnd();
+                            });
+                        }
+                        else {
+                            //camera.CameraStart(comboBoxDevice.SelectedIndex);
+
+                            Bitmap captureImage = camera.CaptureImage(imageFileName);
+                            //Graphicsの作成
+                            Graphics g = Graphics.FromImage(captureImage);
+                            //画面全体をコピーする
+                            g.CopyFromScreen(new Point((int)numericUpDownLeft.Value, (int)numericUpDownTop.Value), new Point(0, 0), new Size((int)numericUpDownRight.Value, (int)numericUpDownBottom.Value));
+                            //解放
+                            g.Dispose();
+
+                            captureImage.Save(imageFileName);
+
+                            // 画像を切り抜く
+                            Bitmap bmpBase = new Bitmap(imageFileName);
+                            Rectangle rect = new Rectangle((int)numericUpDownLeft.Value, (int)numericUpDownTop.Value, (int)numericUpDownRight.Value, (int)numericUpDownBottom.Value);
+                            Bitmap bmpNew = bmpBase.Clone(rect, bmpBase.PixelFormat);
+
+                            //表示
+                            pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
+                            pictureBox1.Image = bmpNew;
+                            //camera.CameraEnd();
+                            bmpBase.Dispose();
+                            //bmpNew.Dispose();
+                        }
+
+                    }
                 }
-                else {
-                    camera.CameraStart(comboBoxDevice.SelectedIndex);
-
-                    Bitmap captureImage = camera.CaptureImage();
-                    //Graphicsの作成
-                    Graphics g = Graphics.FromImage(captureImage);
-                    //画面全体をコピーする
-                    g.CopyFromScreen(new Point((int)numericUpDownLeft.Value, (int)numericUpDownTop.Value), new Point(0, 0), new Size((int)numericUpDownRight.Value, (int)numericUpDownBottom.Value));
-                    //解放
-                    g.Dispose();
-
-                    camera.CameraEnd();
-                }
+            }
+            catch(Exception ex) {
+                logger.Error("画像キャプチャエラー Error=" + ex.Message + " StackTrace=" + ex.StackTrace);
             }
         }
 
@@ -368,19 +413,19 @@ namespace DQ10ManagementTool {
 
         private void debug_button_Click(object sender, EventArgs e) {
             string text = @"
-カテドラルロープ+3 ★★★
+カテドラルロープ+2
 からE上レア度 B
-使い込み。店売り不可
-神に身を捧げた
-高德の聖職者を
-守護する法衣
-Lv 99以上装備可
-追加効果
+使い込み度100
+結晶の個数 39
+Lv 99 以上装備可
 錬金石D赤の錬金石
-錬金効果:おもさ+15
-錬金効果:呪いガード+60%
-錬金効果:呪いガード+60%
-できのよさ: しゅびカ +4
+神に身を捧げた
+高徳の聖職者を
+守護する法衣
+追加効果
+錬金効果金即死ガー ド+60(+10)%
+錬金効果:即死ガー ド+40%
+できのよさ: しゅびカ +2
 戦士 僧侶 魔使 武闘 盗賊 旅芸 バト パラ 魔戦 レン 賢者 スパ
 まも どう 踊り 占い 天地 遊び デス
 0錬金強化を見る
@@ -422,7 +467,7 @@ O装備できる仲間モンスターを見る
                 return;
             }
             int userId = userList.Where(x => x.name == userListBox.SelectedItem.ToString()).First().id;
-            entryWindow.SetItems(userId, entryItems, defineItemData);
+            entryWindow.SetItems(userId, entryItems, defineItemData, imageFileName);
             entryWindow.ShowEntry();
         }
 
@@ -558,7 +603,7 @@ O装備できる仲間モンスターを見る
                 updateList = itemdata.Where(x => x.Name == itemName).ToList<ItemBase>();
             }
 
-            entryWindow.SetItems(userId, updateList, defineItemData);
+            entryWindow.SetItems(userId, updateList, defineItemData, null);
             entryWindow.ShowUpdate();
         }
 
@@ -636,6 +681,28 @@ O装備できる仲間モンスターを見る
             captureTextButton_Click(null, null);
             entryButton_Click(null, null);
             timer1.Enabled = true;
+        }
+
+        private void comboBoxDevice_SelectedIndexChanged(object sender, EventArgs e) {
+            if (captureRadioCamera.Checked) {
+                CameraInitilize();
+            }
+            else {
+                CameraRelease();
+            }
+        }
+
+        private void CameraInitilize() {
+            CameraRelease();
+            camera = new CameraManager();
+            camera.CameraStart(comboBoxDevice.SelectedIndex);
+        }
+
+        private void CameraRelease() {
+            if(camera != null) {
+                camera.CameraEnd();
+                camera = null;
+            }
         }
     }
 }

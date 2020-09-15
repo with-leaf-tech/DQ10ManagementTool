@@ -8,6 +8,7 @@ using OCRClassLibrary.OCR;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,15 +17,25 @@ namespace TestApp {
     class Program {
         [STAThread]
         static void Main(string[] args) {
+            Bitmap bitmap = new Bitmap(@"C:\temp\image.png");
+
+            System.Drawing.ImageConverter converter = new System.Drawing.ImageConverter();
+            byte[] a = (byte[])converter.ConvertTo(bitmap, typeof(byte[]));
+
+            string bbb = JsonConvert.SerializeObject(a);
+
+            byte[] aaa = JsonConvert.DeserializeObject<byte[]>(bbb);
+
+            Bitmap aa = new Bitmap(new MemoryStream(aaa));
+
             /*
             CameraManager camera = new CameraManager();
             var list = camera.GetDeviceList();
 
             camera.CameraStart(0);
-            Bitmap bitmap = camera.CaptureImage();
+            Bitmap bitmap = camera.CaptureImage(@"C:\temp\aaa.png");
             camera.CameraEnd();
             */
-
             //Screen sc = new Screen();
             //Bitmap bitmap = sc.screenCapture(300, 500, 20, 20, @"C:\Tools\e89239da.jpg");
             /*

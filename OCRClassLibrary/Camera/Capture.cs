@@ -60,6 +60,8 @@ namespace OCRClassLibrary.Camera {
 
         private int rotCookie = 0;
 
+        private string captureFile = "";
+
         internal enum PlayState {
             Init, Stopped, Paused, Running
         }
@@ -122,7 +124,8 @@ namespace OCRClassLibrary.Camera {
         /// Capture Image
         /// </summary>
         /// <returns></returns>
-        public Bitmap CaptureImage() {
+        public Bitmap CaptureImage(string fileName) {
+            captureFile = fileName;
             int hr;
             if (sampGrabber == null)
                 return null;
@@ -160,10 +163,10 @@ namespace OCRClassLibrary.Camera {
                 int stride = w * 3;
 
                 GCHandle handle = GCHandle.Alloc(savedArray, GCHandleType.Pinned);
-                int scan0 = (int)handle.AddrOfPinnedObject();
+                var scan0 = handle.AddrOfPinnedObject();
                 scan0 += (h - 1) * stride;
                 captureImage = new Bitmap(w, h, -stride, PixelFormat.Format24bppRgb, (IntPtr)scan0);
-                captureImage.Save(@"C:\Temp2\Mandrill.jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
+                //captureImage.Save(captureFile, ImageFormat.Png);
 
                 handle.Free();
 
@@ -225,7 +228,11 @@ namespace OCRClassLibrary.Camera {
                 //ResizeVideoWindow();
 
                 // Make the video window visible, now that it is properly positioned
-                hr = videoWin.put_Visible(DsHlp.OATRUE);
+                hr = videoWin.put_Visible(DsHlp.OAFALSE);
+                if (hr < 0)
+                    Marshal.ThrowExceptionForHR(hr);
+
+                hr = videoWin.put_AutoShow(DsHlp.OAFALSE);
                 if (hr < 0)
                     Marshal.ThrowExceptionForHR(hr);
 

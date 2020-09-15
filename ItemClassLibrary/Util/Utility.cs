@@ -5,6 +5,7 @@ using ItemClassLibrary.Entity.Equipment;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -14,6 +15,7 @@ using System.Threading.Tasks;
 
 namespace ItemClassLibrary.Util {
     static public class Utility {
+        private static readonly log4net.ILog logger = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         public static string PARTS_SET = "セット装備";
         public static string PARTS_HEAD = "アタマ";
@@ -288,179 +290,202 @@ namespace ItemClassLibrary.Util {
         }
 
         public static List<ItemBase> AnalyzeItem(int userId, string text, List<ItemBase> itemList) {
-            string name = "";
-            string equip = "";
-            List<string> detailList = new List<string>();
-            List<ItemBase> returnList = new List<ItemBase>();
-            int remainBorder = 11;
-            string tempName = "";
+            try {
+                string name = "";
+                string equip = "";
+                List<string> detailList = new List<string>();
+                List<ItemBase> returnList = new List<ItemBase>();
+                int remainBorder = 11;
+                string tempName = "";
 
-            MatchCollection mc1 = Regex.Matches(text, @"\dこ");
-            MatchCollection mc2 = Regex.Matches(text, @"\dに");
-            if (mc1.Count > 0 || mc2.Count > 0) {
-                List<ItemBase> defineList = itemList.Where(x => ITEM_CATEGORY_LIST.Contains(x.Classification)).ToList();
-                equip = "";
-                text = text
-                    .Replace("1に", "1こ")
-                    .Replace("2に", "2こ")
-                    .Replace("3に", "3こ")
-                    .Replace("4に", "4こ")
-                    .Replace("5に", "5こ")
-                    .Replace("6に", "6こ")
-                    .Replace("7に", "7こ")
-                    .Replace("8に", "8こ")
-                    .Replace("9に", "9こ")
-                    .Replace("0に", "0こ")
-                    .Replace(" 2", "こ");
-                int itemIndex = 0;
-                string[] parts = text.Replace("”", "").Replace("\"", "").Replace("\r\n", "\n").Split(new char[] { '\n' });
-                for (int i = 0; i < parts.Length; i++) {
-                    mc1 = Regex.Matches(parts[i], @"\dこ");
-                    if (parts[i] == "る") {
-                        continue;
-                    }
-                    if (parts[i].Length == 0) {
-                        continue;
-                    }
-                    if (mc1.Count > 0
-                        ) {
-                        if (parts[i].Contains(" ")) {
-                            string[] div = parts[i].Split(new char[] { ' ' });
-                            string itemName = GetNearlyString(div[0], defineList.Select(x => x.Name).ToList()).FirstOrDefault();
-                            detailList.Add(itemName + "," + div[1].Replace("こ", ""));
+                MatchCollection mc1 = Regex.Matches(text, @"\dこ");
+                MatchCollection mc2 = Regex.Matches(text, @"\dに");
+                if (mc1.Count > 0 || mc2.Count > 0) {
+                    List<ItemBase> defineList = itemList.Where(x => ITEM_CATEGORY_LIST.Contains(x.Classification)).ToList();
+                    equip = "";
+                    text = text
+                        .Replace("1に", "1こ")
+                        .Replace("2に", "2こ")
+                        .Replace("3に", "3こ")
+                        .Replace("4に", "4こ")
+                        .Replace("5に", "5こ")
+                        .Replace("6に", "6こ")
+                        .Replace("7に", "7こ")
+                        .Replace("8に", "8こ")
+                        .Replace("9に", "9こ")
+                        .Replace("0に", "0こ")
+                        .Replace(" 2", "こ");
+                    int itemIndex = 0;
+                    string[] parts = text.Replace("”", "").Replace("\"", "").Replace("\r\n", "\n").Split(new char[] { '\n' });
+                    for (int i = 0; i < parts.Length; i++) {
+                        mc1 = Regex.Matches(parts[i], @"\dこ");
+                        if (parts[i] == "る") {
+                            continue;
+                        }
+                        if (parts[i].Length == 0) {
+                            continue;
+                        }
+                        if (mc1.Count > 0
+                            ) {
+                            if (parts[i].Contains(" ")) {
+                                string[] div = parts[i].Split(new char[] { ' ' });
+                                string itemName = GetNearlyString(div[0], defineList.Select(x => x.Name).ToList()).FirstOrDefault();
+                                detailList.Add(itemName + "," + div[1].Replace("こ", ""));
+                            }
+                            else {
+                                while (detailList[itemIndex].Contains(",")) {
+                                    itemIndex++;
+                                }
+                                detailList[itemIndex++] += "," + parts[i].Replace("こ", "");
+                            }
                         }
                         else {
-                            while (detailList[itemIndex].Contains(",")) {
-                                itemIndex++;
-                            }
-                            detailList[itemIndex++] += "," + parts[i].Replace("こ", "");
+                            string itemName = GetNearlyString(parts[i], defineList.Select(x => x.Name).ToList()).FirstOrDefault();
+                            detailList.Add(itemName);
                         }
                     }
-                    else {
-                        string itemName = GetNearlyString(parts[i], defineList.Select(x => x.Name).ToList()).FirstOrDefault();
-                        detailList.Add(itemName);
+                    for (int i = 0; i < detailList.Count; i++) {
+                        string[] itemParts = detailList[i].Split(new char[] { ',' });
+                        Item item = ((Item)(itemList.Where(x => x.Name == itemParts[0]).FirstOrDefault())).Clone();
+                        item.OwnerId = userId;
+                        item.count = int.Parse(itemParts[1]);
+                        returnList.Add(item);
                     }
                 }
-                for(int i = 0; i < detailList.Count; i++) {
-                    string[] itemParts = detailList[i].Split(new char[] { ',' });
-                    Item item = ((Item)(itemList.Where(x => x.Name == itemParts[0]).FirstOrDefault())).Clone();
-                    item.OwnerId = userId;
-                    item.count = int.Parse(itemParts[1]);
-                    returnList.Add(item);
-                }
-            }
-            else {
-                string[] longLineText = new string[] { "輝石", "戦神" };
-                string[] specialAbility = new string[] { "伝承", "秘石", "鬼石" };
-                string[] namehead = new string[] { "EO", "ED", "EE", "NB", "の", "○", "N回", "E回", "回", "囚", "图", "四", "E图", "NO", "NG", "NE", "v3", "①", "②", "D", "E", "S", "N", "O", "B", "@", "3", "2" };
-                string[] parts = text.Replace(" ", "").Replace("\r\n", "\n").Split(new char[] { '\n' });
-                List<ItemBase> defineList = itemList.Where(x => EQUIP_CATEGORY_LIST.Contains(x.Classification)).ToList();
-                List<string> remainList = new List<string>();
-                bool remainStart = false;
-                for (int i = 0; i < parts.Length; i++) {
-                    if (parts[i].Length == 0) {
-                        continue;
-                    }
-                    if (tempName.Length == 0) {
-                        tempName = parts[i];
-                    }
-                    if (remainStart == false && name.Length == 0 && parts[i].Contains("+")) {
-                        name = parts[i].Replace(" ", "");
-                        if (longLineText.Where(x => name.Contains(x)).Count() > 0) {
-                            remainBorder = 13;
+                else {
+                    string[] longLineText = new string[] { "輝石", "戦神" };
+                    string[] specialAbility = new string[] { "伝承", "秘石", "鬼石" };
+                    string[] namehead = new string[] { "EO", "ED", "EE", "NB", "の", "○", "N回", "E回", "回", "囚", "图", "四", "E图", "NO", "NG", "NE", "v3", "①", "②", "D", "E", "S", "N", "O", "B", "@", "3", "2" };
+                    string[] parts = text.Replace(" ", "").Replace("\r\n", "\n").Split(new char[] { '\n' });
+                    List<ItemBase> defineList = itemList.Where(x => EQUIP_CATEGORY_LIST.Contains(x.Classification)).ToList();
+                    List<string> remainList = new List<string>();
+                    bool remainStart = false;
+                    for (int i = 0; i < parts.Length; i++) {
+                        if (parts[i].Length == 0) {
+                            continue;
                         }
-                    }
-
-                    if (equip.Length == 0 && EQUIP_CATEGORY_LIST.Where(x => parts[i].Contains(x.Replace("アクセサリー（", "").Replace("）", ""))).Count() > 0) {
-                        equip = EQUIP_CATEGORY_LIST.Where(x => parts[i].Contains(x.Replace("アクセサリー（", "").Replace("）", ""))).FirstOrDefault();
-                    }
-
-                    if (parts[i].Contains("追加効果")) {
-                        remainStart = true;
-                        continue;
-                    }
-                    if (parts[i].Contains("錬金石")) {
-                        continue;
-                    }
-                    parts[i] = parts[i].Replace("効果企", "効果:").Replace("効果金", "効果:").Replace("効果:企", "効果:").Replace("効果:金", "効果:").Replace("効果:", "効果");
-                    if (parts[i].Contains("錬金効") || parts[i].Contains("基礎効") || parts[i].Contains("合成効") || parts[i].Contains("伝承効")
-                        || parts[i].Contains("輝石効") || parts[i].Contains("秘石効") || parts[i].Contains("戦神効") || parts[i].Contains("鬼石効")) {
-                        string detail = parts[i]
-                            .Replace("錬金効果", "錬金:")
-                            .Replace("輝石効果", "輝石:")
-                            .Replace("秘石効果", "秘石:")
-                            .Replace("戦神効果", "戦神:")
-                            .Replace("鬼石効果", "鬼石:")
-                            .Replace("合成効果", "合成:")
-                            .Replace("伝承効果", "伝承:")
-                            .Replace("基礎効果", "基礎:");
-
-                        detailList.Add(detail);
-                    }
-                    else if (!parts[i].Contains("できのよさ")) {
-                        for (int j = 0; j < detailList.Count; j++) {
-                            if (detailList[j].Length < remainBorder && remainList.Count > 0) {
-                                detailList[j] += remainList[remainList.Count - 1];
-                                remainList.RemoveAt(remainList.Count - 1);
-                                break;
+                        if (tempName.Length == 0) {
+                            tempName = parts[i];
+                        }
+                        if (remainStart == false && name.Length == 0 && parts[i].Contains("+")) {
+                            name = parts[i].Replace(" ", "");
+                            if (longLineText.Where(x => name.Contains(x)).Count() > 0) {
+                                remainBorder = 13;
                             }
                         }
-                        if (remainStart) {
-                            remainList.Add(parts[i].Replace(" ", ""));
+
+                        if (equip.Length == 0 && EQUIP_CATEGORY_LIST.Where(x => parts[i].Contains(x.Replace("アクセサリー（", "").Replace("）", ""))).Count() > 0) {
+                            equip = EQUIP_CATEGORY_LIST.Where(x => parts[i].Contains(x.Replace("アクセサリー（", "").Replace("）", ""))).FirstOrDefault();
                         }
-                    }
 
-                    if (parts[i].Contains("戦士") || parts[i].Contains("僧侶")) {
-                        break;
-                    }
-                }
+                        if (parts[i].Contains("追加効果")) {
+                            remainStart = true;
+                            continue;
+                        }
+                        if (parts[i].Contains("錬金石")) {
+                            continue;
+                        }
+                        parts[i] = parts[i].Replace("効果企", "効果:").Replace("効果金", "効果:").Replace("効果:企", "効果:").Replace("効果:金", "効果:").Replace("効果:", "効果");
+                        if (parts[i].Contains("錬金効") || parts[i].Contains("基礎効") || parts[i].Contains("合成効") || parts[i].Contains("伝承効")
+                            || parts[i].Contains("輝石効") || parts[i].Contains("秘石効") || parts[i].Contains("戦神効") || parts[i].Contains("鬼石効")) {
+                            string detail = parts[i]
+                                .Replace("錬金効果", "錬金:")
+                                .Replace("輝石効果", "輝石:")
+                                .Replace("秘石効果", "秘石:")
+                                .Replace("戦神効果", "戦神:")
+                                .Replace("鬼石効果", "鬼石:")
+                                .Replace("合成効果", "合成:")
+                                .Replace("伝承効果", "伝承:")
+                                .Replace("基礎効果", "基礎:");
 
-                if (name.Length == 0) {
-                    name = tempName.Replace(" ", "");
-                }
-                if (name.Length > 0) {
-                    for (int i = 0; i < namehead.Length; i++) {
-                        if (name.Substring(0, namehead[i].Length) == namehead[i]) {
-                            name = name.Substring(namehead[i].Length);
+                            detailList.Add(detail);
+                        }
+                        else if (!parts[i].Contains("できのよさ")) {
+                            for (int j = 0; j < detailList.Count; j++) {
+                                if (detailList[j].Length < remainBorder && remainList.Count > 0) {
+                                    detailList[j] += remainList[remainList.Count - 1];
+                                    remainList.RemoveAt(remainList.Count - 1);
+                                    break;
+                                }
+                            }
+                            if (remainStart) {
+                                remainList.Add(parts[i].Replace(" ", ""));
+                            }
+                        }
+
+                        if (parts[i].Contains("戦士") || parts[i].Contains("僧侶")) {
                             break;
                         }
                     }
-                }
-                if (name.IndexOf("+") > 0 && name.IndexOf("+") + 2 != name.Length) {
-                    name = name.Substring(0, name.IndexOf("+") + 2);
-                }
-                for (int i = 0; i < detailList.Count; i++) {
-                    detailList[i] = detailList[i].Replace(" ", "").Replace("_", "");
-                }
-                int refine = 0;
-                string itemName = GetNearlyString(name, defineList.Select(x => x.Name).ToList()).FirstOrDefault();
-                string refineString = name.Substring(name.IndexOf("+"));
-                if(refineString.Length > 0) {
-                    refine = int.Parse(refineString);
-                }
 
-                EquipmentBase item = ((EquipmentBase)(defineList.Where(x => x.Name == itemName).FirstOrDefault())).Clone();
-                item.OwnerId = userId;
-                item.Refine = refine;
-                for (int i = 0; i < detailList.Count; i++) {
-                    string[] ability = detailList[i].Split(new char[] { ':' });
-                    if(ability.Length > 1) {
-                        if (ability[0].Contains("基礎")) {
-                            item.BasicAbility.Add(ability[1]);
-                        }
-                        else if (specialAbility.Where(x => ability[0].Contains(x)).Count() > 0) {
-                            item.SpecialAbility.Add(ability[1]);
-                        }
-                        else {
-                            item.RefineAbility.Add(ability[1]);
+                    if (name.Length == 0) {
+                        name = tempName.Replace(" ", "");
+                    }
+                    if (name.Length > 0) {
+                        for (int i = 0; i < namehead.Length; i++) {
+                            if (name.Substring(0, namehead[i].Length) == namehead[i]) {
+                                name = name.Substring(namehead[i].Length);
+                                break;
+                            }
                         }
                     }
+                    if (name.IndexOf("+") > 0 && name.IndexOf("+") + 2 != name.Length) {
+                        name = name.Substring(0, name.IndexOf("+") + 2);
+                    }
+                    for (int i = 0; i < detailList.Count; i++) {
+                        detailList[i] = detailList[i].Replace(" ", "").Replace("_", "");
+                    }
+                    int refine = 0;
+                    string itemName = GetNearlyString(name, defineList.Select(x => x.Name).ToList()).FirstOrDefault();
+                    string refineString = name.Substring(name.IndexOf("+"));
+                    if (refineString.Length > 0) {
+                        refine = int.Parse(refineString);
+                    }
+
+                    EquipmentBase item = ((EquipmentBase)(defineList.Where(x => x.Name == itemName).FirstOrDefault())).Clone();
+                    item.OwnerId = userId;
+                    item.Refine = refine;
+                    for (int i = 0; i < detailList.Count; i++) {
+                        string[] ability = detailList[i].Split(new char[] { ':' });
+                        if (ability.Length > 1) {
+                            if (ability[0].Contains("基礎")) {
+                                item.BasicAbility.Add(ability[1]);
+                            }
+                            else if (specialAbility.Where(x => ability[0].Contains(x)).Count() > 0) {
+                                item.SpecialAbility.Add(ability[1]);
+                            }
+                            else {
+                                item.RefineAbility.Add(ability[1]);
+                            }
+                        }
+                    }
+                    returnList.Add(item);
                 }
-                returnList.Add(item);
+                return returnList;
             }
-            return returnList;
+            catch(Exception e) {
+                logger.Error("アナライズエラー Error=" + e.Message + " StackTrace=" + e.StackTrace);
+                return null;
+            }
+
         }
 
+        public static string SerializeBitmap(Bitmap bitmap) {
+            ImageConverter converter = new ImageConverter();
+            byte[] imageBytes = (byte[])converter.ConvertTo(bitmap, typeof(byte[]));
+            return JsonConvert.SerializeObject(imageBytes);
+        }
+
+        public static Bitmap DeSerializeBitmap(string text) {
+            try {
+                byte[] imageBytes = JsonConvert.DeserializeObject<byte[]>(text);
+                Bitmap bitmap = new Bitmap(new MemoryStream(imageBytes));
+                return bitmap;
+            }
+            catch(Exception e) {
+                return null;
+            }
+        }
 
     }
 }

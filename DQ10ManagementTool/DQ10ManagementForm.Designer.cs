@@ -56,6 +56,9 @@
             this.autoCaptureTextStartButton = new System.Windows.Forms.Button();
             this.autoCaptureInterval = new System.Windows.Forms.NumericUpDown();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
+            this.replaceAddButton = new System.Windows.Forms.Button();
+            this.replaceDistTextBox = new System.Windows.Forms.TextBox();
+            this.replaceSourceTextBox = new System.Windows.Forms.TextBox();
             this.debug_button = new System.Windows.Forms.Button();
             this.dataDownloadButton = new System.Windows.Forms.Button();
             this.captureTextBox = new System.Windows.Forms.TextBox();
@@ -109,9 +112,6 @@
             this.groupBox8 = new System.Windows.Forms.GroupBox();
             this.allUserRadioButton = new System.Windows.Forms.RadioButton();
             this.selectUserRadioButton = new System.Windows.Forms.RadioButton();
-            this.replaceSourceTextBox = new System.Windows.Forms.TextBox();
-            this.replaceDistTextBox = new System.Windows.Forms.TextBox();
-            this.replaceAddButton = new System.Windows.Forms.Button();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownTop)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownLeft)).BeginInit();
@@ -319,6 +319,7 @@
             this.comboBoxDevice.Name = "comboBoxDevice";
             this.comboBoxDevice.Size = new System.Drawing.Size(145, 20);
             this.comboBoxDevice.TabIndex = 2;
+            this.comboBoxDevice.SelectedIndexChanged += new System.EventHandler(this.comboBoxDevice_SelectedIndexChanged);
             // 
             // captureRadioCamera
             // 
@@ -525,6 +526,30 @@
             this.groupBox5.Size = new System.Drawing.Size(294, 92);
             this.groupBox5.TabIndex = 15;
             this.groupBox5.TabStop = false;
+            // 
+            // replaceAddButton
+            // 
+            this.replaceAddButton.Location = new System.Drawing.Point(213, 63);
+            this.replaceAddButton.Name = "replaceAddButton";
+            this.replaceAddButton.Size = new System.Drawing.Size(75, 23);
+            this.replaceAddButton.TabIndex = 4;
+            this.replaceAddButton.Text = "変換追加";
+            this.replaceAddButton.UseVisualStyleBackColor = true;
+            this.replaceAddButton.Click += new System.EventHandler(this.replaceAddButton_Click);
+            // 
+            // replaceDistTextBox
+            // 
+            this.replaceDistTextBox.Location = new System.Drawing.Point(7, 65);
+            this.replaceDistTextBox.Name = "replaceDistTextBox";
+            this.replaceDistTextBox.Size = new System.Drawing.Size(203, 19);
+            this.replaceDistTextBox.TabIndex = 3;
+            // 
+            // replaceSourceTextBox
+            // 
+            this.replaceSourceTextBox.Location = new System.Drawing.Point(7, 41);
+            this.replaceSourceTextBox.Name = "replaceSourceTextBox";
+            this.replaceSourceTextBox.Size = new System.Drawing.Size(203, 19);
+            this.replaceSourceTextBox.TabIndex = 2;
             // 
             // debug_button
             // 
@@ -1163,30 +1188,6 @@
             this.selectUserRadioButton.Text = "選択ユーザー";
             this.selectUserRadioButton.UseVisualStyleBackColor = true;
             this.selectUserRadioButton.CheckedChanged += new System.EventHandler(this.userRadioButton_CheckedChanged);
-            // 
-            // replaceSourceTextBox
-            // 
-            this.replaceSourceTextBox.Location = new System.Drawing.Point(7, 41);
-            this.replaceSourceTextBox.Name = "replaceSourceTextBox";
-            this.replaceSourceTextBox.Size = new System.Drawing.Size(203, 19);
-            this.replaceSourceTextBox.TabIndex = 2;
-            // 
-            // replaceDistTextBox
-            // 
-            this.replaceDistTextBox.Location = new System.Drawing.Point(7, 65);
-            this.replaceDistTextBox.Name = "replaceDistTextBox";
-            this.replaceDistTextBox.Size = new System.Drawing.Size(203, 19);
-            this.replaceDistTextBox.TabIndex = 3;
-            // 
-            // replaceAddButton
-            // 
-            this.replaceAddButton.Location = new System.Drawing.Point(213, 63);
-            this.replaceAddButton.Name = "replaceAddButton";
-            this.replaceAddButton.Size = new System.Drawing.Size(75, 23);
-            this.replaceAddButton.TabIndex = 4;
-            this.replaceAddButton.Text = "変換追加";
-            this.replaceAddButton.UseVisualStyleBackColor = true;
-            this.replaceAddButton.Click += new System.EventHandler(this.replaceAddButton_Click);
             // 
             // timer1
             // 
