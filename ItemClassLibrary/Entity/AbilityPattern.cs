@@ -10,7 +10,7 @@ namespace ItemClassLibrary.Entity {
         public string Classification { get; set; }
         public string Name { get; set; }
         public List<string> PatternList { get; set; }
-        public AbilityPattern(string classification, string name, List<string[]> param, string option) {
+        public AbilityPattern(string classification, string name, List<string[]> param) {
             this.Classification = classification;
             this.Name = name;
             if(param != null) {
@@ -24,7 +24,7 @@ namespace ItemClassLibrary.Entity {
                             string[] status = paramList[j].Replace(" ", "").Split(new char[] { ',' });
                             for (int k = 0; k < status.Length; k++) {
                                 string appendNum = status[k] == "0" ? "" : float.Parse(status[k]) > 0 ? "(+" + status[k] + ")" : "(" + status[k] + ")";
-                                PatternList.Add(baseString.Replace(replaceString, baseParams[j].ToString() + appendNum + option));
+                                PatternList.Add(baseString.Replace(replaceString, baseParams[j].ToString() + appendNum));
 
                             }
                         }

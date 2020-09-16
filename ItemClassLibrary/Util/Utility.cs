@@ -23,7 +23,6 @@ namespace ItemClassLibrary.Util {
         public static string PARTS_LOWERBODY = "からだ下";
         public static string PARTS_ARM = "ウデ";
         public static string PARTS_LEG = "足";
-        public static string PARTS_WEAPON = "武器";
         public static string PARTS_SHIELD = "盾";
         public static string PARTS_WEAPON_ONEHANDSWORD = "片手剣";
         public static string PARTS_WEAPON_TWOHANDSWORD = "両手剣";
@@ -87,6 +86,24 @@ namespace ItemClassLibrary.Util {
         public static string REGIST_BIND = "しばり";
         public static string REGIST_CHARM = "魅了";
 
+
+        public static string[] WEAPON_LIST = new string[] {
+            PARTS_WEAPON_ONEHANDSWORD,
+            PARTS_WEAPON_TWOHANDSWORD,
+            PARTS_WEAPON_KNIFE,
+            PARTS_WEAPON_SPEAR,
+            PARTS_WEAPON_AXE,
+            PARTS_WEAPON_NAIL,
+            PARTS_WEAPON_WHIP,
+            PARTS_WEAPON_STICK,
+            PARTS_WEAPON_WAND,
+            PARTS_WEAPON_CLUB,
+            PARTS_WEAPON_FAN,
+            PARTS_WEAPON_HAMMER,
+            PARTS_WEAPON_BOW,
+            PARTS_WEAPON_BOOMERANG,
+            PARTS_WEAPON_SICKLE,
+        };
 
         public static string[] REGIST_LIST = new string[] {
             REGIST_PALSY,
@@ -274,8 +291,8 @@ namespace ItemClassLibrary.Util {
                 int topScore = hitList.Max();
                 var hitIndexList = hitList.Select((x, i) => new int[] { x, i }).OrderByDescending(y => y[0]).ToList();
 
-                // 候補を5件まで取る
-                for (int i = 0; i < (hitIndexList.Count >= 5 ? 5 : hitIndexList.Count); i++) {
+                // 候補を10件まで取る
+                for (int i = 0; i < (hitIndexList.Count >= 10 ? 10 : hitIndexList.Count); i++) {
                     topList.Add(candidacyData[hitIndexList[i][1]]);
                 }
             }

@@ -20,77 +20,19 @@ namespace ItemClassLibrary.Manage {
     public class ItemManager {
         private static ItemManager m_itemManager = null;
 
-        string saveDirectory = @"C:\Text\";
-        string saveItemFile = @"itemData.json";
-        string saveAbilityFile = @"ability.json";
-        string replaceFile = @"Replace.json";
+        string allItemFile = System.Configuration.ConfigurationManager.AppSettings["allItemFile"];
+        string allAbilityFile = System.Configuration.ConfigurationManager.AppSettings["allAbilityFile"];
+        string replaceFile = System.Configuration.ConfigurationManager.AppSettings["replaceFile"];
 
         List<AbilityPattern> abilityList = new List<AbilityPattern>();
 
-        string[] setEquipUrls = new string[] {
-                "http://bazaar.d-quest-10.com/list/sp_set/lv_1.html"
-            };
-
-        string[] equipUrls = new string[] {
-                "http://bazaar.d-quest-10.com/list/d_head/lv_1.html",
-                "http://bazaar.d-quest-10.com/list/d_upper/lv_1.html",
-                "http://bazaar.d-quest-10.com/list/d_lower/lv_1.html",
-                "http://bazaar.d-quest-10.com/list/d_arm/lv_1.html",
-                "http://bazaar.d-quest-10.com/list/d_leg/lv_1.html",
-                "http://bazaar.d-quest-10.com/list/d_shield/lv_1.html",
-                "http://bazaar.d-quest-10.com/list/w_hand/lv_1.html",
-                "http://bazaar.d-quest-10.com/list/w_both/lv_1.html",
-                "http://bazaar.d-quest-10.com/list/w_short/lv_1.html",
-                "http://bazaar.d-quest-10.com/list/w_spear/lv_1.html",
-                "http://bazaar.d-quest-10.com/list/w_axe/lv_1.html",
-                "http://bazaar.d-quest-10.com/list/w_claw/lv_1.html",
-                "http://bazaar.d-quest-10.com/list/w_whip/lv_1.html",
-                "http://bazaar.d-quest-10.com/list/w_stick/lv_1.html",
-                "http://bazaar.d-quest-10.com/list/w_cane/lv_1.html",
-                "http://bazaar.d-quest-10.com/list/w_club/lv_1.html",
-                "http://bazaar.d-quest-10.com/list/w_fan/lv_1.html",
-                "http://bazaar.d-quest-10.com/list/w_hammer/lv_1.html",
-                "http://bazaar.d-quest-10.com/list/w_bow/lv_1.html",
-                "http://bazaar.d-quest-10.com/list/w_boomerang/lv_1.html",
-                "http://bazaar.d-quest-10.com/list/w_falx/lv_1.html"
-            };
-
-        string[] equipAccessoryUrls = new string[] {
-                "http://bazaar.d-quest-10.com/list/d_accessory/pop_2.html"
-            };
-
-        string[] equipCraftUrls = new string[] {
-                "http://bazaar.d-quest-10.com/list/t_hammer/lv_1.html",
-                "http://bazaar.d-quest-10.com/list/t_knife/lv_1.html",
-                "http://bazaar.d-quest-10.com/list/t_needle/lv_1.html",
-                "http://bazaar.d-quest-10.com/list/t_pot/lv_1.html",
-                "http://bazaar.d-quest-10.com/list/t_lamp/lv_1.html",
-                "http://bazaar.d-quest-10.com/list/t_flypan/lv_1.html",
-                "http://bazaar.d-quest-10.com/list/o_fishing/popular_1.html",
-                "http://bazaar.d-quest-10.com/list/o_food/popular_1.html"
-            };
-
-
-        string[] itemUrls = new string[] {
-                "http://bazaar.d-quest-10.com/list/o_material/popular_1.html",
-                "http://bazaar.d-quest-10.com/list/o_orb/popular_1.html",
-                "http://bazaar.d-quest-10.com/list/o_coin/popular_1.html",
-                "http://bazaar.d-quest-10.com/list/o_flower/popular_1.html",
-                "http://bazaar.d-quest-10.com/list/h_seed/popular_1.html",
-                "http://bazaar.d-quest-10.com/list/o_recipe/popular_1.html",
-                "http://bazaar.d-quest-10.com/list/o_scout/popular_1.html",
-                "http://bazaar.d-quest-10.com/list/o_gesture/popular_1.html"
-            };
-
-        string[] itemDetailUrls = new string[] {
-                "http://bazaar.d-quest-10.com/list/o_supply/popular_1.html",
-                "http://bazaar.d-quest-10.com/list/h_house/popular_1.html",
-            };
-
-        string[] itemSimpleUrls = new string[] {
-                "http://bazaar.d-quest-10.com/list/h_furniture/popular_1.html",
-                "http://bazaar.d-quest-10.com/list/h_garden/popular_1.html"
-            };
+        string[] setEquipUrls = System.Configuration.ConfigurationManager.AppSettings["setEquipUrls"].Replace(" ", "").Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+        string[] equipUrls = System.Configuration.ConfigurationManager.AppSettings["equipUrls"].Replace(" ", "").Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+        string[] equipAccessoryUrls = System.Configuration.ConfigurationManager.AppSettings["equipAccessoryUrls"].Replace(" ", "").Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+        string[] equipCraftUrls = System.Configuration.ConfigurationManager.AppSettings["equipCraftUrls"].Replace(" ", "").Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+        string[] itemUrls = System.Configuration.ConfigurationManager.AppSettings["itemUrls"].Replace(" ", "").Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+        string[] itemDetailUrls = System.Configuration.ConfigurationManager.AppSettings["itemDetailUrls"].Replace(" ", "").Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+        string[] itemSimpleUrls = System.Configuration.ConfigurationManager.AppSettings["itemSimpleUrls"].Replace(" ", "").Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
 
         string[] setHeader = Utility.setHeader;
         string[] equipHeader = Utility.equipHeader;
@@ -136,12 +78,12 @@ namespace ItemClassLibrary.Manage {
             // 定義ファイルを解析しアイテムリストを保持する
             loadReplaceData();
 
-            if (File.Exists(saveDirectory + saveAbilityFile)) {
-                abilityList = Utility.ReadAbilityPattern(saveDirectory + saveAbilityFile);
+            if (File.Exists(allAbilityFile)) {
+                abilityList = Utility.ReadAbilityPattern(allAbilityFile);
             }
 
-            if (File.Exists(saveDirectory + saveItemFile)) {
-                string jsonString = File.ReadAllText(saveDirectory + saveItemFile);
+            if (File.Exists(allItemFile)) {
+                string jsonString = File.ReadAllText(allItemFile);
 
                 List<JObject> obj = JsonConvert.DeserializeObject<List<JObject>>(jsonString);
                 for(int i = 0; i < obj.Count; i++) {
@@ -273,8 +215,8 @@ namespace ItemClassLibrary.Manage {
                         classification == Utility.PARTS_WEAPON_SICKLE
                         ) {
                         Weapon data = JsonConvert.DeserializeObject<Weapon>(obj[i].ToString());
-                        if (abilityList.Where(x => x.Classification == Utility.PARTS_WEAPON).Count() > 0) {
-                            AbilityPattern ability = abilityList.Where(x => x.Classification == Utility.PARTS_WEAPON).First();
+                        if (abilityList.Where(x => x.Classification == classification).Count() > 0) {
+                            AbilityPattern ability = abilityList.Where(x => x.Classification == classification).First();
                             data.AbilityPattern = ability.PatternList;
                         }
                         m_itemList.Add(data);
@@ -319,7 +261,7 @@ namespace ItemClassLibrary.Manage {
                 m_itemList.AddRange(DownloadItemData(itemHeaderDetail, itemDetailUrls[i]));
             }
 
-            File.WriteAllText(saveDirectory + saveItemFile, JsonConvert.SerializeObject(m_itemList));
+            File.WriteAllText(allItemFile, JsonConvert.SerializeObject(m_itemList));
         }
 
         private List<ItemBase> DownloadItemData(string[] header, string url) {

@@ -32,8 +32,8 @@ namespace DQ10ManagementTool {
         private PictureBox pictureArea = new PictureBox();
 
         private int userId = -1;
-        private string saveItemFile = @"ItemData.json";
-        private string saveEquipFile = @"EquipData.json";
+        private string saveItemFile = System.Configuration.ConfigurationManager.AppSettings["saveItemFile"];
+        private string saveEquipFile = System.Configuration.ConfigurationManager.AppSettings["saveEquipFile"];
         private string imageFileName = "";
         private Bitmap screenShot = null;
 

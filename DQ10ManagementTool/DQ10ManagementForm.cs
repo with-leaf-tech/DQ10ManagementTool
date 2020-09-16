@@ -26,23 +26,22 @@ namespace DQ10ManagementTool {
         TesseractOCR tesseractOcr = null;
         AzureComputerVisionApiOCR azureOcr = null;
         OcrBase ocr = null;
-        string imageFileName = "image.png";
-        string settingFileName = "setting.txt";
-        string userFileName = "user.txt";
-        int settingCount = 6;
-        bool noChange = false;
 
-        private string saveItemFile = @"ItemData.json";
-        private string saveEquipFile = @"EquipData.json";
+        private string imageFileName = System.Configuration.ConfigurationManager.AppSettings["imageFileName"];
+        private string settingFileName = System.Configuration.ConfigurationManager.AppSettings["settingFileName"];
+        private string userFileName = System.Configuration.ConfigurationManager.AppSettings["userFileName"];
+        private string saveItemFile = System.Configuration.ConfigurationManager.AppSettings["saveItemFile"];
+        private string saveEquipFile = System.Configuration.ConfigurationManager.AppSettings["saveEquipFile"];
+
+        private int settingCount = 6;
+        private bool noChange = false;
 
         List<(int top, int left, int right, int bottom, bool check)> settingList = new List<(int top, int left, int right, int bottom, bool check)>();
         List<(int id, string name, bool check)> userList = new List<(int id, string name, bool check)>();
 
         ItemManager itemManager = ItemManager.GetInstance();
         List<ItemBase> defineItemData = new List<ItemBase>();
-
         List<ItemBase> entryItems = new List<ItemBase>();
-
         CameraManager camera = new CameraManager();
 
         //EntryEquipForm entryEquipWindow = new EntryEquipForm();
@@ -52,6 +51,18 @@ namespace DQ10ManagementTool {
         public DQ10ManagementForm() {
             InitializeComponent();
 
+            try {
+                string VersionFile = System.Configuration.ConfigurationManager.AppSettings["VersionFile"];
+                string ModuleFile = System.Configuration.ConfigurationManager.AppSettings["ModuleFile"];
+                string ZipPass = System.Configuration.ConfigurationManager.AppSettings["ZipPass"];
+
+                AutoUpdateClassLibrary.AutoUpdate updateLib = new AutoUpdateClassLibrary.AutoUpdate();
+                updateLib.clearOldFiles();
+                updateLib.update(VersionFile, ModuleFile, this, false, ZipPass);
+            }
+            catch (Exception e) {
+                logger.Error("バージョンアップに失敗しました. error=" + e.Message);
+            }
 
             initialize();
         }
@@ -230,43 +241,59 @@ namespace DQ10ManagementTool {
                                 //camera.CameraStart(comboBoxDevice.SelectedIndex);
 
                                 Bitmap captureImage = camera.CaptureImage(imageFileName);
+                                /*
                                 //Graphicsの作成
                                 Graphics g = Graphics.FromImage(captureImage);
                                 //画面全体をコピーする
                                 g.CopyFromScreen(new Point((int)numericUpDownLeft.Value, (int)numericUpDownTop.Value), new Point(0, 0), new Size((int)numericUpDownRight.Value, (int)numericUpDownBottom.Value));
                                 //解放
                                 g.Dispose();
+                                */
+                                captureImage.Save(imageFileName);
 
-                                //表示
+                                // 画像を切り抜く
+                                Rectangle rect = new Rectangle((int)numericUpDownLeft.Value, (int)numericUpDownTop.Value, (int)numericUpDownRight.Value, (int)numericUpDownBottom.Value);
+                                Bitmap bmpNew = captureImage.Clone(rect, captureImage.PixelFormat);
+                                bmpNew.Save(imageFileName);
                                 pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
-                                pictureBox1.Image = captureImage;
-                                //camera.CameraEnd();
+                                pictureBox1.Image = bmpNew;
                             });
                         }
                         else {
                             //camera.CameraStart(comboBoxDevice.SelectedIndex);
 
                             Bitmap captureImage = camera.CaptureImage(imageFileName);
+                            /*
                             //Graphicsの作成
                             Graphics g = Graphics.FromImage(captureImage);
                             //画面全体をコピーする
                             g.CopyFromScreen(new Point((int)numericUpDownLeft.Value, (int)numericUpDownTop.Value), new Point(0, 0), new Size((int)numericUpDownRight.Value, (int)numericUpDownBottom.Value));
                             //解放
                             g.Dispose();
-
+                            */
                             captureImage.Save(imageFileName);
 
                             // 画像を切り抜く
-                            Bitmap bmpBase = new Bitmap(imageFileName);
+                            Rectangle rect = new Rectangle((int)numericUpDownLeft.Value, (int)numericUpDownTop.Value, (int)numericUpDownRight.Value, (int)numericUpDownBottom.Value);
+                            Bitmap bmpNew = captureImage.Clone(rect, captureImage.PixelFormat);
+                            bmpNew.Save(imageFileName);
+                            pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
+                            pictureBox1.Image = bmpNew;
+
+                            //bmpNew.Dispose();
+                            /*
                             Rectangle rect = new Rectangle((int)numericUpDownLeft.Value, (int)numericUpDownTop.Value, (int)numericUpDownRight.Value, (int)numericUpDownBottom.Value);
                             Bitmap bmpNew = bmpBase.Clone(rect, bmpBase.PixelFormat);
+                            bmpNew.Save(imageFileName);
 
                             //表示
                             pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
                             pictureBox1.Image = bmpNew;
                             //camera.CameraEnd();
                             bmpBase.Dispose();
+                            captureImage.Dispose();
                             //bmpNew.Dispose();
+                            */
                         }
 
                     }
@@ -487,11 +514,13 @@ O装備できる仲間モンスターを見る
             searchAbilityListBox.Items.Clear();
             searchResultListBox.Items.Clear();
             List<int> userIdList = new List<int>();
-            if (selectUserRadioButton.Checked) {
-                userIdList.Add(userList.Where(x => x.name == userListBox.SelectedItem.ToString()).First().id);
-            }
-            else {
-                userIdList.AddRange(userList.Select(x => x.id).ToArray());
+            if(userList.Count > 0) {
+                if (selectUserRadioButton.Checked) {
+                    userIdList.Add(userList.Where(x => x.name == userListBox.SelectedItem.ToString()).First().id);
+                }
+                else {
+                    userIdList.AddRange(userList.Select(x => x.id).ToArray());
+                }
             }
 
             if (searchPartsListBox.SelectedIndex >= 0) {
