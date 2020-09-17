@@ -32,6 +32,7 @@ namespace DQ10ManagementTool {
         private PictureBox pictureArea = new PictureBox();
 
         private int userId = -1;
+        private string saveDir = System.Configuration.ConfigurationManager.AppSettings["saveDir"];
         private string saveItemFile = System.Configuration.ConfigurationManager.AppSettings["saveItemFile"];
         private string saveEquipFile = System.Configuration.ConfigurationManager.AppSettings["saveEquipFile"];
         private string imageFileName = "";
@@ -359,15 +360,15 @@ namespace DQ10ManagementTool {
 
                 // 削除する
                 List<EquipmentBase> equipList = new List<EquipmentBase>();
-                if (File.Exists(userId + "_" + saveEquipFile)) {
-                    equipList = JsonConvert.DeserializeObject<List<EquipmentBase>>(File.ReadAllText(userId + "_" + saveEquipFile));
+                if (File.Exists(saveDir + userId + "_" + saveEquipFile)) {
+                    equipList = JsonConvert.DeserializeObject<List<EquipmentBase>>(File.ReadAllText(saveDir + userId + "_" + saveEquipFile));
                 }
                 if (updateMode) {
                     string itemName = prevEquip.Name;
                     string ability = string.Join(" ", prevEquip.RefineAbility) + " " + string.Join(" ", prevEquip.SpecialAbility);
                     equipList.Remove(equipList.Where(x => x.Name == itemName && string.Join(" ", x.RefineAbility) + " " + string.Join(" ", x.SpecialAbility) == ability).First());
                 }
-                File.WriteAllText(userId + "_" + saveEquipFile, JsonConvert.SerializeObject(equipList));
+                File.WriteAllText(saveDir + userId + "_" + saveEquipFile, JsonConvert.SerializeObject(equipList));
             }
             else {
                 if(MessageBox.Show("以下全て削除されます！", "確認", MessageBoxButtons.OKCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) == DialogResult.OK) {
@@ -375,13 +376,13 @@ namespace DQ10ManagementTool {
 
                     // 削除する
                     List<Item> itemList = new List<Item>();
-                    if (File.Exists(userId + "_" + saveItemFile)) {
-                        itemList = JsonConvert.DeserializeObject<List<Item>>(File.ReadAllText(userId + "_" + saveItemFile));
+                    if (File.Exists(saveDir + userId + "_" + saveItemFile)) {
+                        itemList = JsonConvert.DeserializeObject<List<Item>>(File.ReadAllText(saveDir + userId + "_" + saveItemFile));
                     }
                     if (updateMode) {
                         itemList.RemoveAll(x => x.Name == updateItemName);
                     }
-                    File.WriteAllText(userId + "_" + saveItemFile, JsonConvert.SerializeObject(itemList));
+                    File.WriteAllText(saveDir + userId + "_" + saveItemFile, JsonConvert.SerializeObject(itemList));
                 }
                 else {
                     return;
@@ -442,8 +443,8 @@ namespace DQ10ManagementTool {
 
                 // 登録する
                 List<EquipmentBase> equipList = new List<EquipmentBase>();
-                if (File.Exists(userId + "_" + saveEquipFile)) {
-                    equipList = JsonConvert.DeserializeObject<List<EquipmentBase>>(File.ReadAllText(userId + "_" + saveEquipFile));
+                if (File.Exists(saveDir + userId + "_" + saveEquipFile)) {
+                    equipList = JsonConvert.DeserializeObject<List<EquipmentBase>>(File.ReadAllText(saveDir + userId + "_" + saveEquipFile));
                 }
                 if(updateMode) {
                     string itemName = prevEquip.Name;
@@ -451,7 +452,7 @@ namespace DQ10ManagementTool {
                     equipList.Remove(equipList.Where(x => x.Name == itemName && string.Join(" ", x.RefineAbility) + " " + string.Join(" ", x.SpecialAbility) == ability).First());
                 }
                 equipList.Add(equip);
-                File.WriteAllText(userId + "_" + saveEquipFile, JsonConvert.SerializeObject(equipList));
+                File.WriteAllText(saveDir + userId + "_" + saveEquipFile, JsonConvert.SerializeObject(equipList));
             }
             else {
                 List<Item> entryItemData = new List<Item>();
@@ -468,14 +469,14 @@ namespace DQ10ManagementTool {
 
                 // 登録する
                 List<Item> itemList = new List<Item>();
-                if (File.Exists(userId + "_" + saveItemFile)) {
-                    itemList = JsonConvert.DeserializeObject<List<Item>>(File.ReadAllText(userId + "_" + saveItemFile));
+                if (File.Exists(saveDir + userId + "_" + saveItemFile)) {
+                    itemList = JsonConvert.DeserializeObject<List<Item>>(File.ReadAllText(saveDir + userId + "_" + saveItemFile));
                 }
                 if (updateMode) {
                     itemList.RemoveAll(x => x.Name == updateItemName);
                 }
                 itemList.AddRange(entryItemData);
-                File.WriteAllText(userId + "_" + saveItemFile, JsonConvert.SerializeObject(itemList));
+                File.WriteAllText(saveDir + userId + "_" + saveItemFile, JsonConvert.SerializeObject(itemList));
             }
             this.Hide();
         }

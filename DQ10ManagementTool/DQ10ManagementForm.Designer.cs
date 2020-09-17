@@ -113,6 +113,9 @@
             this.allUserRadioButton = new System.Windows.Forms.RadioButton();
             this.selectUserRadioButton = new System.Windows.Forms.RadioButton();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.groupBox9 = new System.Windows.Forms.GroupBox();
+            this.nameRadioButton = new System.Windows.Forms.RadioButton();
+            this.abilityRadioButton = new System.Windows.Forms.RadioButton();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownTop)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownLeft)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -141,6 +144,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.registOrbNum13)).BeginInit();
             this.groupBox7.SuspendLayout();
             this.groupBox8.SuspendLayout();
+            this.groupBox9.SuspendLayout();
             this.SuspendLayout();
             // 
             // numericUpDownTop
@@ -605,7 +609,7 @@
             this.searchAbilityListBox.ItemHeight = 12;
             this.searchAbilityListBox.Location = new System.Drawing.Point(78, 525);
             this.searchAbilityListBox.Name = "searchAbilityListBox";
-            this.searchAbilityListBox.Size = new System.Drawing.Size(115, 256);
+            this.searchAbilityListBox.Size = new System.Drawing.Size(179, 256);
             this.searchAbilityListBox.TabIndex = 19;
             this.searchAbilityListBox.SelectedIndexChanged += new System.EventHandler(this.searchAbilityListBox_SelectedIndexChanged);
             // 
@@ -613,9 +617,9 @@
             // 
             this.searchResultListBox.FormattingEnabled = true;
             this.searchResultListBox.ItemHeight = 12;
-            this.searchResultListBox.Location = new System.Drawing.Point(199, 525);
+            this.searchResultListBox.Location = new System.Drawing.Point(263, 525);
             this.searchResultListBox.Name = "searchResultListBox";
-            this.searchResultListBox.Size = new System.Drawing.Size(735, 256);
+            this.searchResultListBox.Size = new System.Drawing.Size(671, 256);
             this.searchResultListBox.TabIndex = 20;
             this.searchResultListBox.DoubleClick += new System.EventHandler(this.searchResultListBox_DoubleClick);
             // 
@@ -1193,11 +1197,46 @@
             // 
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
+            // groupBox9
+            // 
+            this.groupBox9.Controls.Add(this.abilityRadioButton);
+            this.groupBox9.Controls.Add(this.nameRadioButton);
+            this.groupBox9.Location = new System.Drawing.Point(334, 478);
+            this.groupBox9.Name = "groupBox9";
+            this.groupBox9.Size = new System.Drawing.Size(113, 41);
+            this.groupBox9.TabIndex = 58;
+            this.groupBox9.TabStop = false;
+            // 
+            // nameRadioButton
+            // 
+            this.nameRadioButton.AutoSize = true;
+            this.nameRadioButton.Location = new System.Drawing.Point(6, 17);
+            this.nameRadioButton.Name = "nameRadioButton";
+            this.nameRadioButton.Size = new System.Drawing.Size(47, 16);
+            this.nameRadioButton.TabIndex = 0;
+            this.nameRadioButton.TabStop = true;
+            this.nameRadioButton.Text = "名前";
+            this.nameRadioButton.UseVisualStyleBackColor = true;
+            this.nameRadioButton.CheckedChanged += new System.EventHandler(this.nameRadioButton_CheckedChanged);
+            // 
+            // abilityRadioButton
+            // 
+            this.abilityRadioButton.AutoSize = true;
+            this.abilityRadioButton.Location = new System.Drawing.Point(59, 16);
+            this.abilityRadioButton.Name = "abilityRadioButton";
+            this.abilityRadioButton.Size = new System.Drawing.Size(47, 16);
+            this.abilityRadioButton.TabIndex = 1;
+            this.abilityRadioButton.TabStop = true;
+            this.abilityRadioButton.Text = "効果";
+            this.abilityRadioButton.UseVisualStyleBackColor = true;
+            this.abilityRadioButton.CheckedChanged += new System.EventHandler(this.nameRadioButton_CheckedChanged);
+            // 
             // DQ10ManagementForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(945, 788);
+            this.Controls.Add(this.groupBox9);
             this.Controls.Add(this.groupBox8);
             this.Controls.Add(this.groupBox7);
             this.Controls.Add(this.entryButton);
@@ -1262,6 +1301,8 @@
             this.groupBox7.PerformLayout();
             this.groupBox8.ResumeLayout(false);
             this.groupBox8.PerformLayout();
+            this.groupBox9.ResumeLayout(false);
+            this.groupBox9.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1358,6 +1399,9 @@
         private System.Windows.Forms.TextBox replaceDistTextBox;
         private System.Windows.Forms.TextBox replaceSourceTextBox;
         private System.Windows.Forms.Timer timer1;
+        private System.Windows.Forms.GroupBox groupBox9;
+        private System.Windows.Forms.RadioButton abilityRadioButton;
+        private System.Windows.Forms.RadioButton nameRadioButton;
     }
 }
 

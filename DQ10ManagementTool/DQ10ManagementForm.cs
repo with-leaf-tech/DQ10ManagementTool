@@ -15,6 +15,7 @@ using ItemClassLibrary.Manage;
 using ItemClassLibrary.Entity;
 using System.Text;
 using ItemClassLibrary.Entity.Equipment;
+using System.Text.RegularExpressions;
 
 namespace DQ10ManagementTool {
     public partial class DQ10ManagementForm : Form {
@@ -32,6 +33,7 @@ namespace DQ10ManagementTool {
         private string userFileName = System.Configuration.ConfigurationManager.AppSettings["userFileName"];
         private string saveItemFile = System.Configuration.ConfigurationManager.AppSettings["saveItemFile"];
         private string saveEquipFile = System.Configuration.ConfigurationManager.AppSettings["saveEquipFile"];
+        private string saveDir = System.Configuration.ConfigurationManager.AppSettings["saveDir"];
 
         private int settingCount = 6;
         private bool noChange = false;
@@ -111,7 +113,7 @@ namespace DQ10ManagementTool {
 
             searchEquipRadioButton.Checked = true;
             selectUserRadioButton.Checked = true;
-
+            nameRadioButton.Checked = true;
         }
 
         private void loadUserData() {
@@ -527,22 +529,39 @@ O装備できる仲間モンスターを見る
                 if (searchEquipRadioButton.Checked) {
                     List<EquipmentBase> equipList = new List<EquipmentBase>();
                     for (int i = 0; i < userIdList.Count; i++) {
-                        if (File.Exists(userIdList[i] + "_" + saveEquipFile)) {
-                            equipList.AddRange(JsonConvert.DeserializeObject<List<EquipmentBase>>(File.ReadAllText(userIdList[i] + "_" + saveEquipFile)));
+                        if (File.Exists(saveDir + userIdList[i] + "_" + saveEquipFile)) {
+                            equipList.AddRange(JsonConvert.DeserializeObject<List<EquipmentBase>>(File.ReadAllText(saveDir + userIdList[i] + "_" + saveEquipFile)));
                         }
                     }
-                    searchAbilityListBox.Items.AddRange(equipList.Where(x => x.Classification == searchPartsListBox.SelectedItem.ToString()).Select(x => x.Name).Distinct().ToArray());
+                    if(nameRadioButton.Checked) {
+                        searchAbilityListBox.Items.AddRange(equipList.Where(x => x.Classification == searchPartsListBox.SelectedItem.ToString()).Select(x => x.Name).Distinct().ToArray());
+                    }
+                    else {
+                        List<string> abilityList = new List<string>();
+                        List<EquipmentBase> list = equipList.Where(x => x.Classification == searchPartsListBox.SelectedItem.ToString()).ToList();
+                        for(int i = 0; i < list.Count; i++) {
+                            abilityList.AddRange(list[i].BasicAbility.Select(y => replaceSimpleAbility(y)).ToList());
+                            abilityList.AddRange(list[i].RefineAbility.Select(y => replaceSimpleAbility(y)).ToList());
+                            abilityList.AddRange(list[i].SpecialAbility.Select(y => replaceSimpleAbility(y)).ToList());
+                        }
+                        abilityList = abilityList.Distinct().ToList();
+                        searchAbilityListBox.Items.AddRange(abilityList.ToArray());
+                    }
                 }
                 else {
                     List<Item> itemList = new List<Item>();
                     for (int i = 0; i < userIdList.Count; i++) {
-                        if (File.Exists(userIdList[i] + "_" + saveItemFile)) {
-                            itemList.AddRange(JsonConvert.DeserializeObject<List<Item>>(File.ReadAllText(userIdList[i] + "_" + saveItemFile)));
+                        if (File.Exists(saveDir + userIdList[i] + "_" + saveItemFile)) {
+                            itemList.AddRange(JsonConvert.DeserializeObject<List<Item>>(File.ReadAllText(saveDir + userIdList[i] + "_" + saveItemFile)));
                         }
                     }
                     searchAbilityListBox.Items.AddRange(itemList.Where(x => x.Classification == searchPartsListBox.SelectedItem.ToString()).Select(x => x.Name).Distinct().ToArray());
                 }
             }
+        }
+
+        private string replaceSimpleAbility(string ability) {
+            return Regex.Replace(ability, "[0-9]", "").Replace(")", "").Replace("(", "").Replace("+", "").Replace("-", "").Replace("%", "");
         }
 
         private void DispaySearchResult() {
@@ -562,18 +581,28 @@ O装備できる仲間モンスターを見る
                 if (searchEquipRadioButton.Checked) {
                     List<EquipmentBase> equipList = new List<EquipmentBase>();
                     for (int i = 0; i < userIdList.Count; i++) {
-                        if (File.Exists(userIdList[i] + "_" + saveEquipFile)) {
-                            equipList.AddRange(JsonConvert.DeserializeObject<List<EquipmentBase>>(File.ReadAllText(userIdList[i] + "_" + saveEquipFile)));
+                        if (File.Exists(saveDir + userIdList[i] + "_" + saveEquipFile)) {
+                            equipList.AddRange(JsonConvert.DeserializeObject<List<EquipmentBase>>(File.ReadAllText(saveDir + userIdList[i] + "_" + saveEquipFile)));
                         }
                     }
-                    List<EquipmentBase> displayList = equipList.Where(x => x.Classification == searchPartsListBox.SelectedItem.ToString() && x.Name == searchAbilityListBox.SelectedItem.ToString()).ToList();
+                    List<EquipmentBase> displayList = new List<EquipmentBase>();
+                    if (nameRadioButton.Checked) {
+                        displayList = equipList.Where(x => x.Classification == searchPartsListBox.SelectedItem.ToString() && x.Name == searchAbilityListBox.SelectedItem.ToString()).ToList();
+                    }
+                    else {
+                        displayList = equipList.Where(x => x.Classification == searchPartsListBox.SelectedItem.ToString() && 
+                        x.BasicAbility.Select(y => replaceSimpleAbility(y)).Contains(searchAbilityListBox.SelectedItem.ToString()) ||
+                        x.RefineAbility.Select(y => replaceSimpleAbility(y)).Contains(searchAbilityListBox.SelectedItem.ToString()) ||
+                        x.SpecialAbility.Select(y => replaceSimpleAbility(y)).Contains(searchAbilityListBox.SelectedItem.ToString())
+                        ).ToList();
+                    }
                     searchResultListBox.Items.AddRange(displayList.Select(x => nameDic[x.OwnerId] + "\t" + x.Name + "\t" + string.Join(" ", x.RefineAbility) + " " + string.Join(" ", x.SpecialAbility)).ToArray());
                 }
                 else {
                     List<Item> itemList = new List<Item>();
                     for (int i = 0; i < userIdList.Count; i++) {
-                        if (File.Exists(userIdList[i] + "_" + saveItemFile)) {
-                            itemList.AddRange(JsonConvert.DeserializeObject<List<Item>>(File.ReadAllText(userIdList[i] + "_" + saveItemFile)));
+                        if (File.Exists(saveDir + userIdList[i] + "_" + saveItemFile)) {
+                            itemList.AddRange(JsonConvert.DeserializeObject<List<Item>>(File.ReadAllText(saveDir + userIdList[i] + "_" + saveItemFile)));
                         }
                     }
                     List<Item> displayList = itemList.Where(x => x.Classification == searchPartsListBox.SelectedItem.ToString() && x.Name == searchAbilityListBox.SelectedItem.ToString()).ToList();
@@ -624,11 +653,11 @@ O装備できる仲間モンスターを見る
             List<ItemBase> updateList = new List<ItemBase>();
             if(Utility.EQUIP_CATEGORY_LIST.Contains(defineItemData.Where(x => x.Name == itemName).Select(x => x.Classification).First())) {
                 string ability = data[2];
-                List<EquipmentBase> itemdata = JsonConvert.DeserializeObject<List<EquipmentBase>>(File.ReadAllText(userId + "_" + saveEquipFile));
+                List<EquipmentBase> itemdata = JsonConvert.DeserializeObject<List<EquipmentBase>>(File.ReadAllText(saveDir + userId + "_" + saveEquipFile));
                 updateList = itemdata.Where(x => x.Name == itemName && string.Join(" ", x.RefineAbility) + " " + string.Join(" ", x.SpecialAbility) == ability).ToList<ItemBase>();
             }
             else {
-                List<Item> itemdata = JsonConvert.DeserializeObject<List<Item>>(File.ReadAllText(userId + "_" + saveItemFile));
+                List<Item> itemdata = JsonConvert.DeserializeObject<List<Item>>(File.ReadAllText(saveDir + userId + "_" + saveItemFile));
                 updateList = itemdata.Where(x => x.Name == itemName).ToList<ItemBase>();
             }
 
@@ -660,7 +689,7 @@ O装備できる仲間モンスターを見る
             }
 
             int userId = userList.Where(x => x.name == user).First().id;
-            List<EquipmentBase> haveEquipList = JsonConvert.DeserializeObject<List<EquipmentBase>>(File.ReadAllText(userId + "_" + saveEquipFile));
+            List<EquipmentBase> haveEquipList = JsonConvert.DeserializeObject<List<EquipmentBase>>(File.ReadAllText(saveDir + userId + "_" + saveEquipFile));
 
             Dictionary<string, float> needRegist = new Dictionary<string, float>();
             Dictionary<string, float> orbRegistList = new Dictionary<string, float>();
@@ -731,6 +760,13 @@ O装備できる仲間モンスターを見る
             if(camera != null) {
                 camera.CameraEnd();
                 camera = null;
+            }
+        }
+
+        private void nameRadioButton_CheckedChanged(object sender, EventArgs e) {
+            if(searchEquipRadioButton.Checked) {
+                searchAbilityListBox.Items.Clear();
+                searchResultListBox.Items.Clear();
             }
         }
     }

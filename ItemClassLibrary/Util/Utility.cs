@@ -275,10 +275,13 @@ namespace ItemClassLibrary.Util {
         }
 
         public static List<string> GetNearlyString(string source, List<string> candidacyData) {
+            string justHitString = "";
+
             List<string> topList = new List<string>();
             if (candidacyData.Where(x => x == source).Count() > 0) {
-                topList.Add(source);
-                return topList;
+                justHitString = source;
+                //topList.Add(source);
+                //return topList;
             }
 
             List<int> hitList = new List<int>(candidacyData.Select(x => 0).ToArray());
@@ -298,6 +301,11 @@ namespace ItemClassLibrary.Util {
             }
             else {
                 topList.Add(source);
+            }
+
+            if(topList.Contains(justHitString)) {
+                topList.Remove(justHitString);
+                topList.Insert(0, justHitString);
             }
 
             //var topIndex = hitList.Select((x, i) => new int[] { x, i }).Where(x => x[0] == topScore).Select(x => x[1]).ToArray();
