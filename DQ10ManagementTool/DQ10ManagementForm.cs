@@ -610,12 +610,7 @@ O装備できる仲間モンスターを見る
                     searchResultListBox.Items.Add("　合計" + displayList.Select(x => x.count).Sum() + "個");
                 }
             }
-
         }
-
-
-
-
 
 
         private void searchButton_CheckedChanged(object sender, EventArgs e) {

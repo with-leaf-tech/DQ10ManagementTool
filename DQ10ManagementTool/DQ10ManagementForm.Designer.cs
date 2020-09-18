@@ -599,7 +599,7 @@
             this.searchPartsListBox.ItemHeight = 12;
             this.searchPartsListBox.Location = new System.Drawing.Point(3, 525);
             this.searchPartsListBox.Name = "searchPartsListBox";
-            this.searchPartsListBox.Size = new System.Drawing.Size(69, 256);
+            this.searchPartsListBox.Size = new System.Drawing.Size(119, 256);
             this.searchPartsListBox.TabIndex = 18;
             this.searchPartsListBox.SelectedIndexChanged += new System.EventHandler(this.searchPartsListBox_SelectedIndexChanged);
             // 
@@ -607,7 +607,7 @@
             // 
             this.searchAbilityListBox.FormattingEnabled = true;
             this.searchAbilityListBox.ItemHeight = 12;
-            this.searchAbilityListBox.Location = new System.Drawing.Point(78, 525);
+            this.searchAbilityListBox.Location = new System.Drawing.Point(128, 525);
             this.searchAbilityListBox.Name = "searchAbilityListBox";
             this.searchAbilityListBox.Size = new System.Drawing.Size(179, 256);
             this.searchAbilityListBox.TabIndex = 19;
@@ -617,9 +617,9 @@
             // 
             this.searchResultListBox.FormattingEnabled = true;
             this.searchResultListBox.ItemHeight = 12;
-            this.searchResultListBox.Location = new System.Drawing.Point(263, 525);
+            this.searchResultListBox.Location = new System.Drawing.Point(313, 525);
             this.searchResultListBox.Name = "searchResultListBox";
-            this.searchResultListBox.Size = new System.Drawing.Size(671, 256);
+            this.searchResultListBox.Size = new System.Drawing.Size(621, 256);
             this.searchResultListBox.TabIndex = 20;
             this.searchResultListBox.DoubleClick += new System.EventHandler(this.searchResultListBox_DoubleClick);
             // 
