@@ -74,6 +74,10 @@ namespace ItemClassLibrary.Manage {
         }
 
         private ItemManager() {
+            if(Directory.Exists(allItemFile.Split(new char[] { '/' })[0])) {
+                Directory.CreateDirectory(allItemFile.Split(new char[] { '/' })[0]);
+            }
+
             // ローカル(ネットワーク)から定義ファイルを読み込む
             // 定義ファイルを解析しアイテムリストを保持する
             loadReplaceData();

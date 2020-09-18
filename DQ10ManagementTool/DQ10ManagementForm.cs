@@ -16,6 +16,7 @@ using ItemClassLibrary.Entity;
 using System.Text;
 using ItemClassLibrary.Entity.Equipment;
 using System.Text.RegularExpressions;
+using System.Reflection;
 
 namespace DQ10ManagementTool {
     public partial class DQ10ManagementForm : Form {
@@ -35,6 +36,12 @@ namespace DQ10ManagementTool {
         private string saveEquipFile = System.Configuration.ConfigurationManager.AppSettings["saveEquipFile"];
         private string saveDir = System.Configuration.ConfigurationManager.AppSettings["saveDir"];
 
+        private string GoogleApiKey = System.Configuration.ConfigurationManager.AppSettings["GoogleApiKey"];
+        private string AzureApiKey = System.Configuration.ConfigurationManager.AppSettings["AzureApiKey"];
+        private string TesseractData = System.Configuration.ConfigurationManager.AppSettings["TesseractData"];
+        private string TesseractLang = System.Configuration.ConfigurationManager.AppSettings["TesseractLang"];
+
+        
         private int settingCount = 6;
         private bool noChange = false;
 
@@ -66,29 +73,59 @@ namespace DQ10ManagementTool {
                 logger.Error("バージョンアップに失敗しました. error=" + e.Message);
             }
 
+            string version = Assembly.GetEntryAssembly().GetName().Version.ToString();
+            this.Text += " Version-" + version;
+
+            if (!Directory.Exists(imageFileName.Split(new char[] { '/' })[0])) {
+                Directory.CreateDirectory(imageFileName.Split(new char[] { '/' })[0]);
+            }
+            if (!Directory.Exists(settingFileName.Split(new char[] { '/' })[0])) {
+                Directory.CreateDirectory(settingFileName.Split(new char[] { '/' })[0]);
+            }
+
+
+
             initialize();
         }
 
         private async void initialize() {
             noCaptureCheckBox.Checked = true;
 
+            if(!File.Exists(GoogleApiKey)) {
+                MessageBox.Show(GoogleApiKey + "が見つかりません。");
+                this.Close();
+            }
+            if (!File.Exists(AzureApiKey)) {
+                MessageBox.Show(AzureApiKey + "が見つかりません。");
+                this.Close();
+            }
+            if (!Directory.Exists(TesseractData)) {
+                MessageBox.Show(TesseractData + "が見つかりません。");
+                this.Close();
+            }
+
             googleOcr = new GoogleVisionApiOCR();
-            googleOcr.initialize(@"C:\Users\tsutsumi\Downloads\try-apis-8b2095f28b0e.json", "");
+            googleOcr.initialize(GoogleApiKey, "");
             windowsOcr = new WindowsOCR();
             azureOcr = new AzureComputerVisionApiOCR();
-            await Task.Run(() => azureOcr.initialize(@"C:\Users\tsutsumi\Downloads\azure.txt", ""));
+            await Task.Run(() => azureOcr.initialize(AzureApiKey, ""));
 
             await Task.Run(() => windowsOcr.initialize("", "ja-JP"));
             tesseractOcr = new TesseractOCR();
-            tesseractOcr.initialize(@"C:\Program Files\Tesseract-OCR\tessdata", "jpn");
+            tesseractOcr.initialize(TesseractData, TesseractLang);
             ocrRadioWindows.Checked = true;
 
             ArrayList deviceList = camera.GetDeviceList();
-            for(int i = 0; i < deviceList.Count; i++) {
-                comboBoxDevice.Items.Add(((DsDevice)deviceList[i]).Name);
+            if(deviceList != null) {
+                for (int i = 0; i < deviceList.Count; i++) {
+                    comboBoxDevice.Items.Add(((DsDevice)deviceList[i]).Name);
+                }
+                if (comboBoxDevice.Items.Count > 0) {
+                    comboBoxDevice.SelectedIndex = 0;
+                }
             }
-            if(comboBoxDevice.Items.Count > 0) {
-                comboBoxDevice.SelectedIndex = 0;
+            else {
+                captureRadioCamera.Enabled = false;
             }
             captureRadioDisplay.Checked = true;
 
