@@ -13,6 +13,7 @@ namespace ItemClassLibrary.Entity.Equipment {
         public EquipmentGroup(Dictionary<string, string> itemData, List<ItemBase> equipList) {
             if(itemData != null) {
                 this.Name = itemData[Utility.HEADER_DEFINE_SETNAME];
+                this.Url = itemData[Utility.HEADER_DEFINE_URL];
                 this.Classification = Utility.PARTS_SET;
                 this.RequireLevel = (!itemData.ContainsKey(Utility.HEADER_DEFINE_LV) || itemData[Utility.HEADER_DEFINE_LV] == "-") ? 1 : int.Parse(itemData[Utility.HEADER_DEFINE_LV]);
                 this.EquipableJobs = (!itemData.ContainsKey(Utility.HEADER_DEFINE_EQUIPABLE_JOBS) || itemData[Utility.HEADER_DEFINE_EQUIPABLE_JOBS] == Utility.ALL_JOBS) ? allJobs : itemData[Utility.HEADER_DEFINE_EQUIPABLE_JOBS].Replace(" ", "").Split(new char[] { ',' });

@@ -11,6 +11,7 @@ namespace ItemClassLibrary.Entity {
         public string[] allJobs = Utility.allJobs;
         public int OwnerId { get; set; }
         public string Name { get; set; }
+        public string Url { get; set; }
         public string Classification { get; set; }
         public string Description { get; set; }
         public int count { get; set; }

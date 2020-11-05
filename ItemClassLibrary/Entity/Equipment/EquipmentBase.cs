@@ -33,6 +33,7 @@ namespace ItemClassLibrary.Entity.Equipment {
                 this.AbilityPattern = new List<string>();
 
                 this.Name = itemData[Utility.HEADER_DEFINE_NAME];
+                this.Url = itemData[Utility.HEADER_DEFINE_URL];
                 this.Description = itemData[Utility.HEADER_DEFINE_ABILITY];
                 this.RequireLevel = (!itemData.ContainsKey(Utility.HEADER_DEFINE_LV) || itemData[Utility.HEADER_DEFINE_LV] == "-") ? 1 : int.Parse(itemData[Utility.HEADER_DEFINE_LV]);
                 this.Classification = itemData[Utility.HEADER_DEFINE_CLASSIFICATION];

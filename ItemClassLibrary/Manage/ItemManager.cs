@@ -1,8 +1,10 @@
-﻿using AngleSharp.Html.Dom;
+﻿using AngleSharp.Dom;
+using AngleSharp.Html.Dom;
 using AngleSharp.Html.Parser;
 using ItemClassLibrary.Entity;
 using ItemClassLibrary.Entity.Equipment;
 using ItemClassLibrary.Util;
+using log4net.Repository.Hierarchy;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -14,10 +16,13 @@ using System.Net.Http;
 using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Web.UI;
 
 namespace ItemClassLibrary.Manage {
     public class ItemManager {
+        private static readonly log4net.ILog logger = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         private static ItemManager m_itemManager = null;
 
         string allItemFile = System.Configuration.ConfigurationManager.AppSettings["allItemFile"];
@@ -26,13 +31,13 @@ namespace ItemClassLibrary.Manage {
 
         List<AbilityPattern> abilityList = new List<AbilityPattern>();
 
-        string[] setEquipUrls = System.Configuration.ConfigurationManager.AppSettings["setEquipUrls"].Replace(" ", "").Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
-        string[] equipUrls = System.Configuration.ConfigurationManager.AppSettings["equipUrls"].Replace(" ", "").Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
-        string[] equipAccessoryUrls = System.Configuration.ConfigurationManager.AppSettings["equipAccessoryUrls"].Replace(" ", "").Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
-        string[] equipCraftUrls = System.Configuration.ConfigurationManager.AppSettings["equipCraftUrls"].Replace(" ", "").Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
-        string[] itemUrls = System.Configuration.ConfigurationManager.AppSettings["itemUrls"].Replace(" ", "").Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
-        string[] itemDetailUrls = System.Configuration.ConfigurationManager.AppSettings["itemDetailUrls"].Replace(" ", "").Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
-        string[] itemSimpleUrls = System.Configuration.ConfigurationManager.AppSettings["itemSimpleUrls"].Replace(" ", "").Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+        string[] setEquipUrls = System.Configuration.ConfigurationManager.AppSettings["setEquipUrls"].Replace(" ", Environment.NewLine).Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+        string[] equipUrls = System.Configuration.ConfigurationManager.AppSettings["equipUrls"].Replace(" ", Environment.NewLine).Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+        string[] equipAccessoryUrls = System.Configuration.ConfigurationManager.AppSettings["equipAccessoryUrls"].Replace(" ", Environment.NewLine).Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+        string[] equipCraftUrls = System.Configuration.ConfigurationManager.AppSettings["equipCraftUrls"].Replace(" ", Environment.NewLine).Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+        string[] itemUrls = System.Configuration.ConfigurationManager.AppSettings["itemUrls"].Replace(" ", Environment.NewLine).Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+        string[] itemDetailUrls = System.Configuration.ConfigurationManager.AppSettings["itemDetailUrls"].Replace(" ", Environment.NewLine).Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+        string[] itemSimpleUrls = System.Configuration.ConfigurationManager.AppSettings["itemSimpleUrls"].Replace(" ", Environment.NewLine).Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
 
         string[] setHeader = Utility.setHeader;
         string[] equipHeader = Utility.equipHeader;
@@ -43,11 +48,16 @@ namespace ItemClassLibrary.Manage {
         string[] itemHeaderSimple = Utility.itemHeaderSimple;
 
         List<ItemBase> m_itemList = new List<ItemBase>();
+        List<ItemHistory> m_historyList = new List<ItemHistory>();
         List<(string source, string dist)> replaceList = new List<(string source, string dist)>();
 
 
         public List<ItemBase> GetItemData() {
             return m_itemList;
+        }
+
+        public List<ItemHistory> GetItemHistoryData() {
+            return m_historyList;
         }
 
         private void loadReplaceData() {
@@ -85,6 +95,12 @@ namespace ItemClassLibrary.Manage {
             if (File.Exists(allAbilityFile)) {
                 abilityList = Utility.ReadAbilityPattern(allAbilityFile);
             }
+
+            if (File.Exists(allItemFile.Replace(".", "_history."))) {
+                string jsonString = File.ReadAllText(allItemFile.Replace(".", "_history."));
+                m_historyList = JsonConvert.DeserializeObject<List<ItemHistory>>(jsonString);
+            }
+
 
             if (File.Exists(allItemFile)) {
                 string jsonString = File.ReadAllText(allItemFile);
@@ -265,13 +281,126 @@ namespace ItemClassLibrary.Manage {
                 m_itemList.AddRange(DownloadItemData(itemHeaderDetail, itemDetailUrls[i]));
             }
 
+            string[] fileParts = allItemFile.Split(new char[] { '/' });
+            string itemFileDir = allItemFile.Replace(fileParts[fileParts.Length - 1], "");
+
+            if (!Directory.Exists(itemFileDir)) {
+                Directory.CreateDirectory(itemFileDir);
+            }
+
             File.WriteAllText(allItemFile, JsonConvert.SerializeObject(m_itemList));
+        }
+
+        public void DownloadItemDetail() {
+            DateTime nowTime = DateTime.Now;
+            List<ItemHistory> historyList = new List<ItemHistory>();
+            for(int i = 0; i < m_itemList.Count; i++) {
+                string url = m_itemList[i].Url;
+                string Classification = m_itemList[i].Classification;
+                string name = m_itemList[i].Name;
+                if (url.Length > 0) {
+                    // 指定したサイトのHTMLをストリームで取得する
+                    IHtmlDocument doc = null;
+                    while(doc == null) {
+                        try {
+                            WebRequest req = WebRequest.Create(url);
+                            doc = default(IHtmlDocument);
+                            using (WebResponse res = req.GetResponse()) {
+                                using (Stream stream = res.GetResponseStream()) {
+                                    var parser = new HtmlParser();
+                                    doc = parser.ParseDocument(stream);
+                                }
+                            }
+                        }
+                        catch (Exception e) {
+                            logger.Debug("ダウンロードエラー url=" + url + " Error=" + e.Message);
+                            Thread.Sleep(500);
+                        }
+                    }
+                    ItemHistory history = new ItemHistory();
+                    history.Name = name;
+                    history.Classification = Classification;
+                    history.Url = url;
+                    AngleSharp.Dom.IHtmlCollection<AngleSharp.Dom.IElement> urlElements = doc.QuerySelectorAll("table");
+                    for(int j = 0; j < urlElements.Length; j++) {
+                        AngleSharp.Dom.IHtmlCollection<AngleSharp.Dom.IElement> lines = urlElements[j].QuerySelectorAll("tr");
+                        if (history.NowPrice.Count == 0 && urlElements[j].InnerHtml.Contains(name) && urlElements[j].InnerHtml.Contains(Utility.HEADER_DEFINE_NAME)) {
+                            AngleSharp.Dom.IHtmlCollection<AngleSharp.Dom.IElement> columns = lines[1].QuerySelectorAll("td");
+                            if (urlElements[j].InnerHtml.Contains("★")) {
+                                string lowPrice = parseText(columns[4].InnerHtml).Replace("G", "");
+                                string star1Price = parseText(columns[5].InnerHtml).Replace("G", "");
+                                string star2Price = parseText(columns[6].InnerHtml).Replace("G", "");
+                                string star3Price = parseText(columns[7].InnerHtml).Replace("G", "");
+                                history.NowPrice.Add(nowTime, Str2Decimal(lowPrice));
+                                history.NowPriceStar1.Add(nowTime, Str2Decimal(star1Price));
+                                history.NowPriceStar2.Add(nowTime, Str2Decimal(star2Price));
+                                history.NowPriceStar3.Add(nowTime, Str2Decimal(star3Price));
+
+                            }
+                            else {
+                                string lowPrice = parseText(columns[3].InnerHtml).Replace("G", "");
+                                string buyPrice = parseText(columns[4].InnerHtml).Replace("G", "");
+                                string sellPrice = parseText(columns[5].InnerHtml).Replace("G", "");
+                                history.NowPrice.Add(nowTime, Str2Decimal(lowPrice));
+                                history.BuyPrice = Str2Decimal(buyPrice);
+                                history.SellPrice = Str2Decimal(sellPrice);
+                            }
+                        }
+                        if (urlElements[j].InnerHtml.Contains("日付")) {
+                            int lineCount = lines.Count();
+                            for (int k = 1; k < lineCount; k++) {
+                                AngleSharp.Dom.IHtmlCollection<AngleSharp.Dom.IElement> columns = lines[k].QuerySelectorAll("td");
+                                DateTime date = DateTime.Parse(columns[0].InnerHtml.Split(new string[] { "（" },StringSplitOptions.RemoveEmptyEntries)[0]);
+                                string count = parseText(columns[1].InnerHtml);
+                                string price = parseText(columns[2].InnerHtml).Replace("G", "");
+                                string star1Price = parseText(columns[3].InnerHtml).Replace("G", "");
+                                string star2Price = parseText(columns[4].InnerHtml).Replace("G", "");
+                                string star3Price = parseText(columns[5].InnerHtml).Replace("G", "");
+                                history.HistoryCount.Add(date, Str2Decimal(count));
+                                history.HistoryPrice.Add(date, Str2Decimal(price));
+                                history.HistoryPriceStar1.Add(date, Str2Decimal(star1Price));
+                                history.HistoryPriceStar2.Add(date, Str2Decimal(star2Price));
+                                history.HistoryPriceStar3.Add(date, Str2Decimal(star3Price));
+                            }
+
+                        }
+                    }
+                    historyList.Add(history);
+                }
+            }
+
+            m_historyList = historyList;
+            string[] fileParts = allItemFile.Split(new char[] { '/' });
+            string itemFileDir = allItemFile.Replace(fileParts[fileParts.Length - 1], "");
+
+            if (!Directory.Exists(itemFileDir)) {
+                Directory.CreateDirectory(itemFileDir);
+            }
+
+            File.WriteAllText(allItemFile.Replace(".", "_history."), JsonConvert.SerializeObject(m_historyList));
+        }
+
+        private string parseText(string text) {
+            text = text.Replace("\r\n", " ");
+            text = text.Replace("\n", " ");
+            text = text.Replace("<br>", ",");
+            text = text.Replace("</div><div ", "</div>,<div ");
+            text = Regex.Replace(text, @"<(([^>]|\n)*)>", "");
+            return text;
+        }
+
+        private decimal Str2Decimal(string value) {
+            decimal returnValue = 0;
+            decimal.TryParse(value, out returnValue);
+            return returnValue;
         }
 
         private List<ItemBase> DownloadItemData(string[] header, string url) {
             List<ItemBase> itemList = new List<ItemBase>();
             List<Dictionary<string, string>> equipSetList = new List<Dictionary<string, string>>();
 
+            string[] urlParts = url.Split(new string[] { "//" },StringSplitOptions.RemoveEmptyEntries)[1].Split(new char[] { '/' });
+            string baseUrl = url.Split(new string[] { "//" }, StringSplitOptions.RemoveEmptyEntries)[0] + "//" + urlParts[0];
 
             // 指定したサイトのHTMLをストリームで取得する
             WebRequest req = WebRequest.Create(url);
@@ -314,6 +443,27 @@ namespace ItemClassLibrary.Manage {
                             text = text.Replace("</div><div ", "</div>,<div ");
                             text = Regex.Replace(text, @"<(([^>]|\n)*)>", "");
 
+                            if(header[headerIndex] == Utility.HEADER_DEFINE_NAME || header[headerIndex] == Utility.HEADER_DEFINE_SETNAME) {
+                                var element = columns[k].FirstElementChild;
+                                string data = text;
+                                if(data.Contains(",")) {
+                                    data = data.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries)[0];
+                                }
+                                
+                                while (element != null) {
+                                    if(element.Text() == data) {
+                                        if(element.LastElementChild != null) {
+                                            equipSet[Utility.HEADER_DEFINE_URL] = baseUrl + ((AngleSharp.Html.Dom.IHtmlAnchorElement)element.LastElementChild).PathName;
+                                        }
+                                        else {
+                                            equipSet[Utility.HEADER_DEFINE_URL] = baseUrl + ((AngleSharp.Html.Dom.IHtmlAnchorElement)element).PathName;
+                                        }
+                                    }
+                                    element = element.NextElementSibling;
+                                }
+
+                                int a = 1;
+                            }
 
                             if (header[headerIndex] != Utility.HEADER_DEFINE_BLANK && header[headerIndex] != Utility.HEADER_DEFINE_EQUIPABLE_JOBS && header[headerIndex] != Utility.HEADER_DEFINE_SET_ABILITY && text.Length == 0) {
                                 continue;

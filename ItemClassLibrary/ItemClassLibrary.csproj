@@ -94,6 +94,7 @@
     <Compile Include="Entity\Equipment\UpperBody.cs" />
     <Compile Include="Entity\Item.cs" />
     <Compile Include="Entity\ItemBase.cs" />
+    <Compile Include="Entity\ItemHistory.cs" />
     <Compile Include="Manage\ItemManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Util\Calc.cs" />

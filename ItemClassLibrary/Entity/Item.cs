@@ -19,6 +19,7 @@ namespace ItemClassLibrary.Entity {
 
         public override void CreateItemData(Dictionary<string, string> itemData) {
             if (itemData != null) {
+                this.Url = itemData[Utility.HEADER_DEFINE_URL];
                 this.Name = itemData[Utility.HEADER_DEFINE_NAME];
                 this.Classification = itemData[Utility.HEADER_DEFINE_CLASSIFICATION];
             }

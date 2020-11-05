@@ -192,6 +192,50 @@ namespace ItemClassLibrary.Util {
             ITEM_GARDEN,
         };
 
+        public static string[] ITEM_MARKET_LIST = new string[] {
+            PARTS_HEAD,
+            PARTS_UPPERBODY,
+            PARTS_LOWERBODY,
+            PARTS_ARM,
+            PARTS_LEG,
+            PARTS_SHIELD,
+            PARTS_WEAPON_ONEHANDSWORD,
+            PARTS_WEAPON_TWOHANDSWORD,
+            PARTS_WEAPON_KNIFE,
+            PARTS_WEAPON_SPEAR,
+            PARTS_WEAPON_AXE,
+            PARTS_WEAPON_NAIL,
+            PARTS_WEAPON_WHIP,
+            PARTS_WEAPON_STICK,
+            PARTS_WEAPON_WAND,
+            PARTS_WEAPON_CLUB,
+            PARTS_WEAPON_FAN,
+            PARTS_WEAPON_HAMMER,
+            PARTS_WEAPON_BOW,
+            PARTS_WEAPON_BOOMERANG,
+            PARTS_WEAPON_SICKLE,
+            PARTS_CRAFT_HAMMER,
+            PARTS_CRAFT_KNIFE,
+            PARTS_CRAFT_NEEDLE,
+            PARTS_CRAFT_POT,
+            PARTS_CRAFT_LAMP,
+            PARTS_CRAFT_FLYPAN,
+            PARTS_CRAFT_FISHING,
+            ITEM_MATERIAL,
+            ITEM_SUPPLY,
+            ITEM_FOOD,
+            ITEM_COIN,
+            ITEM_FLOWER,
+            ITEM_SEED,
+            ITEM_RECIPE,
+            ITEM_SCOUT,
+            ITEM_GESTURE,
+            ITEM_HOUSE,
+            ITEM_FURNITURE,
+            ITEM_GARDEN,
+        };
+
+
 
         public static string HEADER_DEFINE_LV = "LV";
         public static string HEADER_DEFINE_SETNAME = "セット名";
@@ -207,6 +251,7 @@ namespace ItemClassLibrary.Util {
         public static string HEADER_DEFINE_SET_ABILITY = "セット効果";
         public static string HEADER_DEFINE_EQUIPABLE_JOBS = "装備職";
         public static string HEADER_DEFINE_NAME = "アイテム名";
+        public static string HEADER_DEFINE_URL = "URL";
         public static string HEADER_DEFINE_CLASSIFICATION = "分類";
         public static string HEADER_DEFINE_EXHIBYTS = "出品数";
         public static string HEADER_DEFINE_MIN_PRICE = "最安値";
