@@ -25,13 +25,17 @@ namespace ItemViewHistory {
             comboBox1.SelectedIndex = 0;
             label3.Text = "";
 
-            DataGridViewLinkColumn link = new DataGridViewLinkColumn();
-            link.HeaderText = "詳細";
-            link.LinkBehavior = LinkBehavior.HoverUnderline;
-            link.TrackVisitedState = true;
+            DataGridViewLinkColumn link1 = new DataGridViewLinkColumn();
+            DataGridViewLinkColumn link2= new DataGridViewLinkColumn();
+            link1.HeaderText = "名前";
+            link1.Width = 1;
 
-            dataGridView1.Columns.Add(link);
-            dataGridView1.Columns.Add("column2", "名前");
+            link2.HeaderText = "名前";
+            link2.LinkBehavior = LinkBehavior.HoverUnderline;
+            link2.TrackVisitedState = true;
+
+            dataGridView1.Columns.Add(link1);
+            dataGridView1.Columns.Add(link2);
             dataGridView1.Columns.Add("column3", "カテゴリ");
             dataGridView1.Columns.Add("column3", "出品数");
             dataGridView1.Columns.Add("column4", "相場");
@@ -149,9 +153,9 @@ namespace ItemViewHistory {
                     x.Classification + "," +
                     x.HistoryCount.Values.First() + "," + 
                     x.NowPrice.Values.First() + "(" + (x.NowPrice.Values.First() - x.HistoryPrice.Where(y => y.Value > 0).Select(y => y.Value).First()) + ")," +
-                    (x.NowPriceStar1.Count == 0 ? "0" : x.NowPriceStar1.Values.First().ToString() + "(" + (x.NowPriceStar1.Values.First() - x.HistoryPriceStar1.Where(y => y.Value > 0).Select(y => y.Value).First()) + ")") + ", " +
-                    (x.NowPriceStar2.Count == 0 ? "0" : x.NowPriceStar2.Values.First().ToString() + "(" + (x.NowPriceStar2.Values.First() - x.HistoryPriceStar2.Where(y => y.Value > 0).Select(y => y.Value).First()) + ")") + "," +
-                    (x.NowPriceStar3.Count == 0 ? "0" : x.NowPriceStar3.Values.First().ToString() + "(" + (x.NowPriceStar3.Values.First() - x.HistoryPriceStar3.Where(y => y.Value > 0).Select(y => y.Value).First()) + ")") + "," +
+                    (x.NowPriceStar1.Count == 0 ? "0" : x.NowPriceStar1.Values.First().ToString() + "(" + (x.NowPriceStar1.Values.First() - (x.HistoryPriceStar1.Where(y => y.Value > 0).Count() == 0 ? 0 : x.HistoryPriceStar1.Where(y => y.Value > 0).Select(y => y.Value).First())) + ")") + ", " +
+                    (x.NowPriceStar2.Count == 0 ? "0" : x.NowPriceStar2.Values.First().ToString() + "(" + (x.NowPriceStar2.Values.First() - (x.HistoryPriceStar2.Where(y => y.Value > 0).Count() == 0 ? 0 : x.HistoryPriceStar2.Where(y => y.Value > 0).Select(y => y.Value).First())) + ")") + "," +
+                    (x.NowPriceStar3.Count == 0 ? "0" : x.NowPriceStar3.Values.First().ToString() + "(" + (x.NowPriceStar3.Values.First() - (x.HistoryPriceStar3.Where(y => y.Value > 0).Count() == 0 ? 0 : x.HistoryPriceStar3.Where(y => y.Value > 0).Select(y => y.Value).First())) + ")") + "," +
                     (x.HistoryPrice.Count == 0 ? 0 : x.HistoryPrice.Where(y => y.Key > DateTime.Now.AddDays(days * -1)).Select(y => y.Value).Max()) + "," + 
                     (x.HistoryPrice.Count == 0 ? 0 : x.HistoryPrice.Where(y => y.Key > DateTime.Now.AddDays(days * -1)).Select(y => y.Value).Min()) + "," +
                     (x.HistoryPriceStar1.Count == 0 ? 0 : x.HistoryPriceStar1.Where(y => y.Key > DateTime.Now.AddDays(days * -1)).Select(y => y.Value).Max()) + "," +
@@ -174,8 +178,8 @@ namespace ItemViewHistory {
 
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e) {
             DataGridView dgv = (DataGridView)sender;
-            if (e.ColumnIndex == 0) {
-                DataGridViewLinkCell cell = (DataGridViewLinkCell)dgv[e.ColumnIndex, e.RowIndex];
+            if (e.ColumnIndex == 1) {
+                DataGridViewLinkCell cell = (DataGridViewLinkCell)dgv[e.ColumnIndex-1, e.RowIndex];
                 string url = cell.Value.ToString();
                 if(url.Length > 0) {
                     System.Diagnostics.Process.Start(url);

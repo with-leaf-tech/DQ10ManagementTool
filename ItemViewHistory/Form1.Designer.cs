@@ -97,16 +97,16 @@
             // numericUpDown2
             // 
             this.numericUpDown2.Increment = new decimal(new int[] {
-            2,
+            5,
             0,
             0,
             0});
             this.numericUpDown2.Location = new System.Drawing.Point(116, 13);
             this.numericUpDown2.Minimum = new decimal(new int[] {
-            2,
+            100,
             0,
             0,
-            0});
+            -2147483648});
             this.numericUpDown2.Name = "numericUpDown2";
             this.numericUpDown2.Size = new System.Drawing.Size(50, 19);
             this.numericUpDown2.TabIndex = 5;
