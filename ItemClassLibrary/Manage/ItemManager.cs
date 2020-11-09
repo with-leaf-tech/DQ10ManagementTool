@@ -3,6 +3,7 @@ using AngleSharp.Html.Dom;
 using AngleSharp.Html.Parser;
 using ItemClassLibrary.Entity;
 using ItemClassLibrary.Entity.Equipment;
+using ItemClassLibrary.Event;
 using ItemClassLibrary.Util;
 using log4net.Repository.Hierarchy;
 using Newtonsoft.Json;
@@ -22,6 +23,9 @@ using System.Web.UI;
 
 namespace ItemClassLibrary.Manage {
     public class ItemManager {
+        public event ItemEventHandler ProgressEvent;
+        public delegate void ItemEventHandler(ItemEventArgs e);
+
         private static readonly log4net.ILog logger = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         private static ItemManager m_itemManager = null;
 
@@ -50,6 +54,10 @@ namespace ItemClassLibrary.Manage {
         List<ItemBase> m_itemList = new List<ItemBase>();
         List<ItemHistory> m_historyList = new List<ItemHistory>();
         List<(string source, string dist)> replaceList = new List<(string source, string dist)>();
+
+        private void UpdateProgress(int TestNumValue, string TestStringValue) {
+            ProgressEvent(new ItemEventArgs(TestNumValue, TestStringValue));
+        }
 
 
         public List<ItemBase> GetItemData() {
@@ -295,6 +303,7 @@ namespace ItemClassLibrary.Manage {
             DateTime nowTime = DateTime.Now;
             List<ItemHistory> historyList = new List<ItemHistory>();
             for(int i = 0; i < m_itemList.Count; i++) {
+                UpdateProgress(1, i.ToString() + "/" + m_itemList.Count.ToString());
                 string url = m_itemList[i].Url;
                 string Classification = m_itemList[i].Classification;
                 string name = m_itemList[i].Name;
@@ -327,10 +336,12 @@ namespace ItemClassLibrary.Manage {
                         if (history.NowPrice.Count == 0 && urlElements[j].InnerHtml.Contains(name) && urlElements[j].InnerHtml.Contains(Utility.HEADER_DEFINE_NAME)) {
                             AngleSharp.Dom.IHtmlCollection<AngleSharp.Dom.IElement> columns = lines[1].QuerySelectorAll("td");
                             if (urlElements[j].InnerHtml.Contains("★")) {
+                                string count = parseText(columns[3].InnerHtml).Replace("以上", "").Replace("不可","0");
                                 string lowPrice = parseText(columns[4].InnerHtml).Replace("G", "");
                                 string star1Price = parseText(columns[5].InnerHtml).Replace("G", "");
                                 string star2Price = parseText(columns[6].InnerHtml).Replace("G", "");
                                 string star3Price = parseText(columns[7].InnerHtml).Replace("G", "");
+                                history.NowCount.Add(nowTime, Str2Decimal(count));
                                 history.NowPrice.Add(nowTime, Str2Decimal(lowPrice));
                                 history.NowPriceStar1.Add(nowTime, Str2Decimal(star1Price));
                                 history.NowPriceStar2.Add(nowTime, Str2Decimal(star2Price));
@@ -338,9 +349,11 @@ namespace ItemClassLibrary.Manage {
 
                             }
                             else {
+                                string count = parseText(columns[2].InnerHtml).Replace("以上", "").Replace("不可", "0");
                                 string lowPrice = parseText(columns[3].InnerHtml).Replace("G", "");
                                 string buyPrice = parseText(columns[4].InnerHtml).Replace("G", "");
                                 string sellPrice = parseText(columns[5].InnerHtml).Replace("G", "");
+                                history.NowCount.Add(nowTime, Str2Decimal(count));
                                 history.NowPrice.Add(nowTime, Str2Decimal(lowPrice));
                                 history.BuyPrice = Str2Decimal(buyPrice);
                                 history.SellPrice = Str2Decimal(sellPrice);

@@ -8,6 +8,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -17,6 +18,9 @@ namespace ItemViewHistory {
         ItemManager manager = ItemManager.GetInstance();
         List<ItemBase> itemList = null;
         List<ItemHistory> itemHist = null;
+
+        object lockObject = new object();
+
         public Form1() {
             InitializeComponent();
 
@@ -24,6 +28,7 @@ namespace ItemViewHistory {
             comboBox1.Items.AddRange(Utility.ITEM_MARKET_LIST);
             comboBox1.SelectedIndex = 0;
             label3.Text = "";
+            label4.Text = "";
 
             int columnNum = 0;
 
@@ -64,16 +69,38 @@ namespace ItemViewHistory {
             itemList = manager.GetItemData();
             itemHist = manager.GetItemHistoryData();
 
-            itemHist = itemHist.Where(x => x.HistoryPrice.Count > 0 && x.HistoryPrice.Values.Min() > 0).ToList();
+            manager.ProgressEvent += Manager_ProgressEvent;
+
+            //itemHist = itemHist.Where(x => x.HistoryPrice.Count > 0 && x.HistoryPrice.Values.Min() > 0).ToList();
+            itemHist = itemHist.Where(x => x.Classification != Utility.PARTS_SET).ToList();
 
         }
 
+        private void Manager_ProgressEvent(ItemClassLibrary.Event.ItemEventArgs e) {
+            this.Invoke((MethodInvoker)(() =>
+            {
+                this.label4.Text = e.TestStringValue + " ダウンロードしました";
+            }));
+        }
+
         private void button1_Click(object sender, EventArgs e) {
+            Thread thread = new Thread(DownloadHistory);
+            thread.Start();
+        }
+
+        private void DownloadHistory() {
             manager.DownloadItemDetail();
+            lock(lockObject) {
+                itemHist = manager.GetItemHistoryData();
+            }
+            this.Invoke((MethodInvoker)(() => {
+                this.label4.Text = "ダウンロード完了しました";
+            }));
         }
 
         private void button2_Click(object sender, EventArgs e) {
             manager.DownloadItemData();
+            itemList = manager.GetItemData();
         }
 
         private void button3_Click(object sender, EventArgs e) {
@@ -86,12 +113,19 @@ namespace ItemViewHistory {
             decimal max = (1 + fluctuation / 100);
             decimal min = (1 - fluctuation / 100);
 
+            string appendMsg = "[エラー発生]";
             dataGridView1.Rows.Clear();
             int resultCount = 0;
             try {
-                List<ItemHistory> searchList = new List<ItemHistory>(itemHist);
-                if(freeword.Length > 0) {
+                List<ItemHistory> searchList = new List<ItemHistory>();
+                lock (lockObject) {
+                    searchList = new List<ItemHistory>(itemHist);
+                }
+                if (freeword.Length > 0) {
                     searchList = searchList.Where(x => x.Name.Contains(freeword)).ToList();
+                    if (checkBox1.Checked) {
+                        searchList = searchList.Where(x => x.NowPrice.Values.First() > 0).ToList();
+                    }
                 }
                 else {
                     if (comboBox1.SelectedItem.ToString() != "すべて") {
@@ -103,14 +137,11 @@ namespace ItemViewHistory {
                             searchList = searchList.Where(x => x.NowPrice.Values.First() > 0).ToList();
                         }
                         searchList = searchList.Where(x =>
-                        x.NowPrice.Values.First() * max < x.HistoryPrice.Where(y => y.Key > DateTime.Now.AddDays(days * -1)).Select(y => y.Value).Max() ||
-                        x.NowPrice.Values.First() * min > x.HistoryPrice.Where(y => y.Key > DateTime.Now.AddDays(days * -1)).Select(y => y.Value).Min()
+                        x.NowPrice.Values.First() * max < x.HistoryPrice.Where(y => y.Key > DateTime.Now.AddDays(days * -1) && y.Value > 0).Select(y => y.Value).Max() ||
+                        x.NowPrice.Values.First() * min > x.HistoryPrice.Where(y => y.Key > DateTime.Now.AddDays(days * -1) && y.Value > 0).Select(y => y.Value).Min()
                         ).ToList();
                         searchList = searchList.OrderByDescending(x =>
-                        Math.Abs(x.NowPrice.Values.First() - x.HistoryPrice.Where(y => y.Key > DateTime.Now.AddDays(days * -1)).Select(y => y.Value).Min()) >
-                        Math.Abs(x.NowPrice.Values.First() - x.HistoryPrice.Where(y => y.Key > DateTime.Now.AddDays(days * -1)).Select(y => y.Value).Max()) ?
-                        Math.Abs(x.NowPrice.Values.First() - x.HistoryPrice.Where(y => y.Key > DateTime.Now.AddDays(days * -1)).Select(y => y.Value).Min()) :
-                        Math.Abs(x.NowPrice.Values.First() - x.HistoryPrice.Where(y => y.Key > DateTime.Now.AddDays(days * -1)).Select(y => y.Value).Max())
+                        Math.Abs(x.HistoryPrice.Where(y => y.Value != x.NowPrice.Values.First() && y.Value > 0).Count() == 0 ? 0 : x.NowPrice.Values.First() - (x.HistoryCount.Count == 0 ? 0 : x.HistoryPrice.Where(y => y.Value != x.NowPrice.Values.First() && y.Value > 0).Select(y => y.Value).First()))
                         ).ToList();
                     }
                     else if (radioButton2.Checked) {
@@ -119,14 +150,11 @@ namespace ItemViewHistory {
                             searchList = searchList.Where(x => x.NowPriceStar1.Values.First() > 0).ToList();
                         }
                         searchList = searchList.Where(x =>
-                        x.NowPriceStar1.Values.First() * max < x.HistoryPriceStar1.Where(y => y.Key > DateTime.Now.AddDays(days * -1)).Select(y => y.Value).Max() ||
-                        x.NowPriceStar1.Values.First() * min > x.HistoryPriceStar1.Where(y => y.Key > DateTime.Now.AddDays(days * -1)).Select(y => y.Value).Min()
+                        x.NowPriceStar1.Values.First() * max < x.HistoryPriceStar1.Where(y => y.Key > DateTime.Now.AddDays(days * -1) && y.Value > 0).Select(y => y.Value).Max() ||
+                        x.NowPriceStar1.Values.First() * min > x.HistoryPriceStar1.Where(y => y.Key > DateTime.Now.AddDays(days * -1) && y.Value > 0).Select(y => y.Value).Min()
                         ).ToList();
                         searchList = searchList.OrderByDescending(x =>
-                        Math.Abs(x.NowPriceStar1.Values.First() - x.HistoryPriceStar1.Where(y => y.Key > DateTime.Now.AddDays(days * -1)).Select(y => y.Value).Min()) >
-                        Math.Abs(x.NowPriceStar1.Values.First() - x.HistoryPriceStar1.Where(y => y.Key > DateTime.Now.AddDays(days * -1)).Select(y => y.Value).Max()) ?
-                        Math.Abs(x.NowPriceStar1.Values.First() - x.HistoryPriceStar1.Where(y => y.Key > DateTime.Now.AddDays(days * -1)).Select(y => y.Value).Min()) :
-                        Math.Abs(x.NowPriceStar1.Values.First() - x.HistoryPriceStar1.Where(y => y.Key > DateTime.Now.AddDays(days * -1)).Select(y => y.Value).Max())
+                        Math.Abs(x.NowPriceStar1.Count == 0 || x.HistoryPriceStar1.Where(y => y.Key > DateTime.Now.AddDays(days * -1) && y.Value != x.NowPriceStar1.Values.First() && y.Value > 0).Count() == 0 ? 0 : x.NowPriceStar1.Values.First() - (x.HistoryPriceStar1.Where(y => y.Key > DateTime.Now.AddDays(days * -1) && y.Value != x.NowPriceStar1.Values.First() && y.Value > 0).Count() == 0 ? 0 : x.HistoryPriceStar1.Where(y => y.Key > DateTime.Now.AddDays(days * -1) && y.Value != x.NowPriceStar1.Values.First() && y.Value > 0).Select(y => y.Value).First()))
                         ).ToList();
                     }
                     else if (radioButton3.Checked) {
@@ -135,14 +163,11 @@ namespace ItemViewHistory {
                             searchList = searchList.Where(x => x.NowPriceStar2.Values.First() > 0).ToList();
                         }
                         searchList = searchList.Where(x =>
-                        x.NowPriceStar2.Values.First() * max < x.HistoryPriceStar2.Where(y => y.Key > DateTime.Now.AddDays(days * -1)).Select(y => y.Value).Max() ||
-                        x.NowPriceStar2.Values.First() * min > x.HistoryPriceStar2.Where(y => y.Key > DateTime.Now.AddDays(days * -1)).Select(y => y.Value).Min()
+                        x.NowPriceStar2.Values.First() * max < x.HistoryPriceStar2.Where(y => y.Key > DateTime.Now.AddDays(days * -1) && y.Value > 0).Select(y => y.Value).Max() ||
+                        x.NowPriceStar2.Values.First() * min > x.HistoryPriceStar2.Where(y => y.Key > DateTime.Now.AddDays(days * -1) && y.Value > 0).Select(y => y.Value).Min()
                         ).ToList();
                         searchList = searchList.OrderByDescending(x =>
-                        Math.Abs(x.NowPriceStar2.Values.First() - x.HistoryPriceStar2.Where(y => y.Key > DateTime.Now.AddDays(days * -1)).Select(y => y.Value).Min()) >
-                        Math.Abs(x.NowPriceStar2.Values.First() - x.HistoryPriceStar2.Where(y => y.Key > DateTime.Now.AddDays(days * -1)).Select(y => y.Value).Max()) ?
-                        Math.Abs(x.NowPriceStar2.Values.First() - x.HistoryPriceStar2.Where(y => y.Key > DateTime.Now.AddDays(days * -1)).Select(y => y.Value).Min()) :
-                        Math.Abs(x.NowPriceStar2.Values.First() - x.HistoryPriceStar2.Where(y => y.Key > DateTime.Now.AddDays(days * -1)).Select(y => y.Value).Max())
+                        Math.Abs(x.NowPriceStar2.Count == 0 || x.HistoryPriceStar2.Where(y => y.Key > DateTime.Now.AddDays(days * -1) && y.Value != x.NowPriceStar2.Values.First() && y.Value > 0).Count() == 0 ? 0 : x.NowPriceStar2.Values.First() - (x.HistoryPriceStar2.Where(y => y.Key > DateTime.Now.AddDays(days * -1) && y.Value != x.NowPriceStar2.Values.First() && y.Value > 0).Count() == 0 ? 0 : x.HistoryPriceStar2.Where(y => y.Key > DateTime.Now.AddDays(days * -1) && y.Value != x.NowPriceStar2.Values.First() && y.Value > 0).Select(y => y.Value).First()))
                         ).ToList();
                     }
                     else if (radioButton4.Checked) {
@@ -151,43 +176,40 @@ namespace ItemViewHistory {
                             searchList = searchList.Where(x => x.NowPriceStar3.Select(y => y.Value).Min() > 0).ToList();
                         }
                         searchList = searchList.Where(x =>
-                        x.NowPriceStar3.Values.First() * max < x.HistoryPriceStar3.Where(y => y.Key > DateTime.Now.AddDays(days * -1)).Select(y => y.Value).Max() ||
-                        x.NowPriceStar3.Values.First() * min > x.HistoryPriceStar3.Where(y => y.Key > DateTime.Now.AddDays(days * -1)).Select(y => y.Value).Min()
+                        x.NowPriceStar3.Values.First() * max < x.HistoryPriceStar3.Where(y => y.Key > DateTime.Now.AddDays(days * -1) && y.Value > 0).Select(y => y.Value).Max() ||
+                        x.NowPriceStar3.Values.First() * min > x.HistoryPriceStar3.Where(y => y.Key > DateTime.Now.AddDays(days * -1) && y.Value > 0).Select(y => y.Value).Min()
                         ).ToList();
                         searchList = searchList.OrderByDescending(x =>
-                        Math.Abs(x.NowPriceStar3.Values.First() - x.HistoryPriceStar3.Where(y => y.Key > DateTime.Now.AddDays(days * -1)).Select(y => y.Value).Min()) >
-                        Math.Abs(x.NowPriceStar3.Values.First() - x.HistoryPriceStar3.Where(y => y.Key > DateTime.Now.AddDays(days * -1)).Select(y => y.Value).Max()) ?
-                        Math.Abs(x.NowPriceStar3.Values.First() - x.HistoryPriceStar3.Where(y => y.Key > DateTime.Now.AddDays(days * -1)).Select(y => y.Value).Min()) :
-                        Math.Abs(x.NowPriceStar3.Values.First() - x.HistoryPriceStar3.Where(y => y.Key > DateTime.Now.AddDays(days * -1)).Select(y => y.Value).Max())
+                        Math.Abs(x.NowPriceStar3.Count == 0 || x.HistoryPriceStar3.Where(y => y.Key > DateTime.Now.AddDays(days * -1) && y.Value != x.NowPriceStar3.Values.First() && y.Value > 0).Count() == 0 ? 0 : x.NowPriceStar3.Values.First() - (x.HistoryPriceStar3.Where(y => y.Key > DateTime.Now.AddDays(days * -1) && y.Value != x.NowPriceStar3.Values.First() && y.Value > 0).Count() == 0 ? 0 : x.HistoryPriceStar3.Where(y => y.Key > DateTime.Now.AddDays(days * -1) && y.Value != x.NowPriceStar3.Values.First() && y.Value > 0).Select(y => y.Value).First()))
                         ).ToList();
                     }
                 }
-
                 resultCount = searchList.Count;
                 List<string[]> dispList = searchList.Select(
                     x =>
                     x.Url + "\t" +
                     x.Name + "\t" +
                     x.Classification + "\t" +
-                    str2decimal(x.HistoryCount.Values.First()) + "\t" +
+                    str2decimal(x.NowCount.Values.First()) + "\t" +
                     str2decimal(x.NowPrice.Values.First()) + "\t" +
-                    str2decimal(x.NowPrice.Values.First() - x.HistoryPrice.Where(y => y.Value > 0).Select(y => y.Value).First()) + "\t" +
+                    str2decimal(x.HistoryPrice.Where(y => y.Value != x.NowPrice.Values.First() && y.Key > DateTime.Now.AddDays(days * -1) && y.Value > 0).Count() == 0 ? 0 : x.NowPrice.Values.First() - (x.HistoryCount.Count == 0 ? 0 : x.HistoryPrice.Where(y => y.Value != x.NowPrice.Values.First() && y.Key > DateTime.Now.AddDays(days * -1) && y.Value > 0).Select(y => y.Value).First())) + "\t" +
                     str2decimal(x.NowPriceStar1.Count == 0 ? "0" : x.NowPriceStar1.Values.First().ToString()) + "\t" +
-                    str2decimal(x.NowPriceStar1.Count == 0 ? 0 : x.NowPriceStar1.Values.First() - (x.HistoryPriceStar1.Where(y => y.Value > 0).Count() == 0 ? 0 : x.HistoryPriceStar1.Where(y => y.Value > 0).Select(y => y.Value).First())) + "\t" +
+                    str2decimal(x.NowPriceStar1.Count == 0 || x.HistoryPriceStar1.Where(y => y.Key > DateTime.Now.AddDays(days * -1) && y.Value != x.NowPriceStar1.Values.First() && y.Value > 0).Count() == 0 ? 0 : x.NowPriceStar1.Values.First() - (x.HistoryPriceStar1.Where(y => y.Key > DateTime.Now.AddDays(days * -1) && y.Value != x.NowPriceStar1.Values.First() && y.Value > 0).Count() == 0 ? 0 : x.HistoryPriceStar1.Where(y => y.Key > DateTime.Now.AddDays(days * -1) && y.Value != x.NowPriceStar1.Values.First() && y.Value > 0).Select(y => y.Value).First())) + "\t" +
                     str2decimal(x.NowPriceStar2.Count == 0 ? "0" : x.NowPriceStar2.Values.First().ToString()) + "\t" +
-                    str2decimal(x.NowPriceStar2.Count == 0 ? 0 : x.NowPriceStar2.Values.First() - (x.HistoryPriceStar2.Where(y => y.Value > 0).Count() == 0 ? 0 : x.HistoryPriceStar2.Where(y => y.Value > 0).Select(y => y.Value).First())) + "\t" +
+                    str2decimal(x.NowPriceStar2.Count == 0 || x.HistoryPriceStar2.Where(y => y.Key > DateTime.Now.AddDays(days * -1) && y.Value != x.NowPriceStar2.Values.First() && y.Value > 0).Count() == 0 ? 0 : x.NowPriceStar2.Values.First() - (x.HistoryPriceStar2.Where(y => y.Key > DateTime.Now.AddDays(days * -1) && y.Value != x.NowPriceStar2.Values.First() && y.Value > 0).Count() == 0 ? 0 : x.HistoryPriceStar2.Where(y => y.Key > DateTime.Now.AddDays(days * -1) && y.Value != x.NowPriceStar2.Values.First() && y.Value > 0).Select(y => y.Value).First())) + "\t" +
                     str2decimal(x.NowPriceStar3.Count == 0 ? "0" : x.NowPriceStar3.Values.First().ToString()) + "\t" +
-                    str2decimal(x.NowPriceStar3.Count == 0 ? 0 : x.NowPriceStar3.Values.First() - (x.HistoryPriceStar3.Where(y => y.Value > 0).Count() == 0 ? 0 : x.HistoryPriceStar3.Where(y => y.Value > 0).Select(y => y.Value).First())) + "\t" +
+                    str2decimal(x.NowPriceStar3.Count == 0 || x.HistoryPriceStar3.Where(y => y.Key > DateTime.Now.AddDays(days * -1) && y.Value != x.NowPriceStar3.Values.First() && y.Value > 0).Count() == 0 ? 0 : x.NowPriceStar3.Values.First() - (x.HistoryPriceStar3.Where(y => y.Key > DateTime.Now.AddDays(days * -1) && y.Value != x.NowPriceStar3.Values.First() && y.Value > 0).Count() == 0 ? 0 : x.HistoryPriceStar3.Where(y => y.Key > DateTime.Now.AddDays(days * -1) && y.Value != x.NowPriceStar3.Values.First() && y.Value > 0).Select(y => y.Value).First())) + "\t" +
                     str2decimal(x.HistoryPrice.Count == 0 ? 0 : x.HistoryPrice.Where(y => y.Key > DateTime.Now.AddDays(days * -1)).Select(y => y.Value).Max()) + "\t" +
-                    str2decimal(x.HistoryPrice.Count == 0 ? 0 : x.HistoryPrice.Where(y => y.Key > DateTime.Now.AddDays(days * -1)).Select(y => y.Value).Min()) + "\t" +
+                    str2decimal(x.HistoryPrice.Where(y => y.Key > DateTime.Now.AddDays(days * -1) && y.Value > 0).Count() == 0 ? 0 : x.HistoryPrice.Where(y => y.Key > DateTime.Now.AddDays(days * -1) && y.Value > 0).Select(y => y.Value).Min()) + "\t" +
                     str2decimal(x.HistoryPriceStar1.Count == 0 ? 0 : x.HistoryPriceStar1.Where(y => y.Key > DateTime.Now.AddDays(days * -1)).Select(y => y.Value).Max()) + "\t" +
-                    str2decimal(x.HistoryPriceStar1.Count == 0 ? 0 : x.HistoryPriceStar1.Where(y => y.Key > DateTime.Now.AddDays(days * -1)).Select(y => y.Value).Min()) + "\t" +
+                    str2decimal(x.HistoryPriceStar1.Where(y => y.Key > DateTime.Now.AddDays(days * -1) && y.Value > 0).Count() == 0 ? 0 : x.HistoryPriceStar1.Where(y => y.Key > DateTime.Now.AddDays(days * -1) && y.Value > 0).Select(y => y.Value).Min()) + "\t" +
                     str2decimal(x.HistoryPriceStar2.Count == 0 ? 0 : x.HistoryPriceStar2.Where(y => y.Key > DateTime.Now.AddDays(days * -1)).Select(y => y.Value).Max()) + "\t" +
-                    str2decimal(x.HistoryPriceStar2.Count == 0 ? 0 : x.HistoryPriceStar2.Where(y => y.Key > DateTime.Now.AddDays(days * -1)).Select(y => y.Value).Min()) + "\t" +
+                    str2decimal(x.HistoryPriceStar2.Where(y => y.Key > DateTime.Now.AddDays(days * -1) && y.Value > 0).Count() == 0 ? 0 : x.HistoryPriceStar2.Where(y => y.Key > DateTime.Now.AddDays(days * -1) && y.Value > 0).Select(y => y.Value).Min()) + "\t" +
                     str2decimal(x.HistoryPriceStar3.Count == 0 ? 0 : x.HistoryPriceStar3.Where(y => y.Key > DateTime.Now.AddDays(days * -1)).Select(y => y.Value).Max()) + "\t" +
-                    str2decimal(x.HistoryPriceStar3.Count == 0 ? 0 : x.HistoryPriceStar3.Where(y => y.Key > DateTime.Now.AddDays(days * -1)).Select(y => y.Value).Min())
+                    str2decimal(x.HistoryPriceStar3.Where(y => y.Key > DateTime.Now.AddDays(days * -1) && y.Value > 0).Count() == 0 ? 0 : x.HistoryPriceStar3.Where(y => y.Key > DateTime.Now.AddDays(days * -1) && y.Value > 0).Select(y => y.Value).Min())
                     ).Distinct().Select(x => x.Split(new char[] { '\t' })).ToList();
                 resultCount = dispList.Count;
+                appendMsg = "";
 
                 for (int i = 0; i < dispList.Count; i++) {
                     dataGridView1.Rows.Add(dispList[i]);
@@ -198,7 +220,7 @@ namespace ItemViewHistory {
             catch (Exception ex) {
 
             }
-            label3.Text = resultCount + "件検索されました";
+            label3.Text = appendMsg + resultCount + "件検索されました";
         }
 
         private string str2decimal(object value) {
