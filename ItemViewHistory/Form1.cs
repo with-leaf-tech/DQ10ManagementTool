@@ -29,6 +29,7 @@ namespace ItemViewHistory {
             comboBox1.SelectedIndex = 0;
             label3.Text = "";
             label4.Text = "";
+            label5.Text = "";
 
             int columnNum = 0;
 
@@ -69,6 +70,8 @@ namespace ItemViewHistory {
             itemList = manager.GetItemData();
             itemHist = manager.GetItemHistoryData();
 
+            label5.Text = "価格最終更新：" + itemHist.Where(x => x.NowPrice.Count > 0).Select(x => x.NowPrice.Keys.Min()).First().ToString("yyyy/MM/dd HH:mm:ss");
+
             manager.ProgressEvent += Manager_ProgressEvent;
 
             //itemHist = itemHist.Where(x => x.HistoryPrice.Count > 0 && x.HistoryPrice.Values.Min() > 0).ToList();
@@ -92,8 +95,10 @@ namespace ItemViewHistory {
             manager.DownloadItemDetail();
             lock(lockObject) {
                 itemHist = manager.GetItemHistoryData();
+                itemHist = itemHist.Where(x => x.Classification != Utility.PARTS_SET).ToList();
             }
             this.Invoke((MethodInvoker)(() => {
+                this.label5.Text = "価格最終更新：" + itemHist.Where(x => x.NowPrice.Count > 0).Select(x => x.NowPrice.Keys.Min()).First().ToString("yyyy/MM/dd HH:mm:ss");
                 this.label4.Text = "ダウンロード完了しました";
             }));
         }
