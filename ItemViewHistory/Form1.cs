@@ -109,10 +109,10 @@ namespace ItemViewHistory {
         }
 
         private void button3_Click(object sender, EventArgs e) {
-            Search("");
+            Search("", 0);
         }
 
-        private void Search(string freeword) {
+        private void Search(string freeword, int mode) {
             int days = int.Parse(numericUpDown1.Value.ToString()) + 1;
             decimal fluctuation = numericUpDown2.Value;
             decimal max = (1 + fluctuation / 100);
@@ -126,8 +126,34 @@ namespace ItemViewHistory {
                 lock (lockObject) {
                     searchList = new List<ItemHistory>(itemHist);
                 }
-                if (freeword.Length > 0) {
+                if (freeword.Length > 0 && mode == 0) {
                     searchList = searchList.Where(x => x.Name.Contains(freeword)).ToList();
+                    if (checkBox1.Checked) {
+                        searchList = searchList.Where(x => x.NowPrice.Values.First() > 0).ToList();
+                    }
+                }
+                if (freeword.Length > 0 && mode == 1) {
+                    searchList = searchList.Where(x => x.MaterialList.Where(y => y.materialName.Contains(freeword)).Count() > 0).ToList();
+                    if (checkBox1.Checked) {
+                        searchList = searchList.Where(x => x.NowPrice.Values.First() > 0).ToList();
+                    }
+                }
+                if (mode == 2) {
+                    if (comboBox1.SelectedItem.ToString() != "すべて") {
+                        searchList = searchList.Where(x => x.Classification == comboBox1.SelectedItem.ToString()).ToList();
+                    }
+                    if (radioButton1.Checked) {
+                        searchList = searchList.Where(x => x.MaterialCost > 0 && x.MaterialCost < x.NowPrice.Values.First()).ToList();
+                    }
+                    else if (radioButton2.Checked) {
+                        searchList = searchList.Where(x => x.MaterialCost > 0 && x.MaterialCost < x.HistoryPriceStar1.Values.First()).ToList();
+                    }
+                    else if (radioButton3.Checked) {
+                        searchList = searchList.Where(x => x.MaterialCost > 0 && x.MaterialCost < x.HistoryPriceStar2.Values.First()).ToList();
+                    }
+                    else if (radioButton4.Checked) {
+                        searchList = searchList.Where(x => x.MaterialCost > 0 && x.MaterialCost < x.HistoryPriceStar3.Values.First()).ToList();
+                    }
                     if (checkBox1.Checked) {
                         searchList = searchList.Where(x => x.NowPrice.Values.First() > 0).ToList();
                     }
@@ -299,8 +325,16 @@ namespace ItemViewHistory {
 
         private void button4_Click(object sender, EventArgs e) {
             if(textBox1.Text.Length > 0) {
-                Search(textBox1.Text);
+                Search(textBox1.Text, 0);
             }
+        }
+
+        private void button5_Click(object sender, EventArgs e) {
+            Search(textBox1.Text, 1);
+        }
+
+        private void button6_Click(object sender, EventArgs e) {
+            Search("", 2);
         }
     }
 }

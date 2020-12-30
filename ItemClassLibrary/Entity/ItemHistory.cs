@@ -9,6 +9,8 @@ namespace ItemClassLibrary.Entity {
         public string Name { get; set; }
         public string Url { get; set; }
         public string Classification { get; set; }
+        public List<(string materialName, int count)> MaterialList { get; set; }
+        public decimal MaterialCost { get; set; }
         public Dictionary<DateTime, decimal> HistoryCount { get; set; }
         public Dictionary<DateTime, decimal> HistoryPrice { get; set; }
         public Dictionary<DateTime, decimal> HistoryPriceStar1 { get; set; }
@@ -33,6 +35,7 @@ namespace ItemClassLibrary.Entity {
             this.NowPriceStar1 = new Dictionary<DateTime, decimal>();
             this.NowPriceStar2 = new Dictionary<DateTime, decimal>();
             this.NowPriceStar3= new Dictionary<DateTime, decimal>();
+            this.MaterialList = new List<(string, int)>();
         }
     }
 }

@@ -375,7 +375,21 @@ namespace ItemClassLibrary.Manage {
                                 history.HistoryPriceStar2.Add(date, Str2Decimal(star2Price));
                                 history.HistoryPriceStar3.Add(date, Str2Decimal(star3Price));
                             }
+                        }
+                        if (urlElements[j].InnerHtml.Contains("必要数×単価")) {
+                            int lineCount = lines.Count();
+                            for (int k = 2; k < lineCount -1; k++) {
+                                AngleSharp.Dom.IHtmlCollection<AngleSharp.Dom.IElement> columns = lines[k].QuerySelectorAll("td");
 
+                                string itemName = parseText(columns[0].InnerHtml);
+                                string count = parseText(columns[1].InnerHtml);
+                                if(itemName == "合計原価") {
+                                    string cost = parseText(columns[3].InnerHtml).Replace("G", "");
+                                    history.MaterialCost = decimal.Parse(cost);
+                                    break;
+                                }
+                                history.MaterialList.Add((itemName, int.Parse(count)));
+                            }
                         }
                     }
                     historyList.Add(history);
